@@ -33,6 +33,10 @@ Un Artifact attend la page sans `<!doctype>`, `<html>`, `<head>` ni `<body>` :
 ./outils/vers-artefact.sh   # produit build/artefact.html
 ```
 
+## Direction artistique
+
+Style cartoon à plat : fond lavande uni, couleurs unies, une seule bande d'ombre nette (bas-droite) et un liseré clair (haut-gauche) par forme, facette claire sur la moitié gauche des lames, contours épais teintés dans la couleur de l'objet, trame de points discrète. Le héros est un chevalier au gros heaume à chevrons et panache rouge ; arme, bouclier, casque et cuirasse prennent la couleur de leur minerai. Primitives : `SH`, `FACET`, `GRIP`, `knightHelm`, `knightShield`, `drawKnight`.
+
 ## Systèmes de jeu
 
 | Système | Résumé |
