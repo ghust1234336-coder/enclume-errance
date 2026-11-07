@@ -150,6 +150,26 @@ canvas.cardcv{width:170px;max-width:100%;height:auto;flex:none;display:block;fil
 .fopt img{width:52px;height:52px;flex:none;border-radius:12px;border:3px solid var(--ol);background:var(--dots),var(--fc,#c9cbe6);box-shadow:inset 0 -6px 0 #2a21401c}
 .fopt .t{font-family:var(--f-disp);font-weight:400;font-size:1.08rem;line-height:1.1;display:block;margin-bottom:2px}
 .fopt .rk{display:inline-block;margin-top:4px;font-family:var(--f-disp);font-weight:400;font-size:.76rem;padding:1px 8px;border-radius:999px;color:#fff;text-shadow:0 1px 0 #0006}
+.item .art{position:relative}
+.stars{position:absolute;left:0;right:0;bottom:-9px;text-align:center;font-size:13px;letter-spacing:-1px;line-height:1;color:#ffd24a;text-shadow:1px 0 0 var(--ol),-1px 0 0 var(--ol),0 1px 0 var(--ol),0 -1px 0 var(--ol),0 2px 0 var(--ol)}
+.stars .off{color:#5e5884}
+.n .st{color:#e8a52a;font-size:.95rem;letter-spacing:-1px;margin-left:4px}
+.statl span.bn{background:#5e58841f;color:#3d3858;border:1px dashed #8f93c4}
+.chip.pr{background:#ffd24a;color:var(--ink);font-size:1.12rem;padding-right:14px}
+.chip.pr b{font-size:.75rem;opacity:.75;margin-right:2px}
+.chip.lt{background:#3d6aa8}
+.prbig{font-family:var(--f-disp);font-size:3.2rem;line-height:1;color:#fff;text-shadow:3px 0 0 var(--ol),-3px 0 0 var(--ol),0 3px 0 var(--ol),0 -3px 0 var(--ol),0 6px 0 var(--ol)}
+.title-rank{font-family:var(--f-disp);font-size:1.2rem;color:var(--r4)}
+.lb{display:flex;flex-direction:column;gap:6px}
+.lbrow{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:8px;align-items:center;background:#f8f7fd;border:3px solid var(--line);border-radius:12px;padding:6px 10px;font-weight:800}
+.lbrow.me{border-color:var(--ol);background:#fff6d2;box-shadow:0 3px 0 var(--ol)}
+.lbrow .pos{font-family:var(--f-disp);font-size:1.25rem;text-align:center}
+.lbrow .pos.p1{color:#e8a52a}.lbrow .pos.p2{color:#8a93a8}.lbrow .pos.p3{color:#c27838}
+.lbrow .who{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lbrow .val{font-family:var(--f-disp);font-size:1.15rem;font-variant-numeric:tabular-nums}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.warn{color:var(--red);font-weight:900}
+.ok{color:var(--r1);font-weight:900}
 .foe{display:flex;gap:12px;align-items:center;width:100%;flex-wrap:wrap}
 .foe canvas.cardcv{width:120px}
 .foestats{display:flex;flex-wrap:wrap;gap:6px}
@@ -170,6 +190,7 @@ canvas.cardcv{width:170px;max-width:100%;height:auto;flex:none;display:block;fil
     <button data-a="tab" data-v="equip">Équipement</button>
     <button data-a="tab" data-v="skills">Compétences</button>
     <button data-a="tab" data-v="market">Marché</button>
+    <button data-a="tab" data-v="rank">Classement</button>
   </nav>
   <main id="main" class="stack"></main>
   <div class="row small" style="justify-content:space-between;color:var(--ink2)"><span>Progression sauvegardée dans ce navigateur.</span><button class="btn sm wood" data-a="askreset">Recommencer une partie</button></div>
@@ -258,17 +279,20 @@ const ENEM={
  horreur:{n:'Horreur abyssale',k:'monstre',hp:160,atk:16,def:6,art:{t:'dragon',col:'#5a3488',heads:3,eye:'#ff4fd0'},sz:1.25},
  mimique:{n:'Mimique',k:'monstre',hp:34,atk:10,def:3,art:{t:'chest',col:'#f2b53a',teeth:1}},
 };
+[[0,0],[350,0],[700,70],[1300,130],[2300,180],[4200,260]].forEach(([pr,l],i)=>Object.assign(ZONES[i],{pr,light:l}));
 [['#fff1c0','#ffcf7a'],['#d6ffb0','#6ad09a'],['#b0c8ff','#6a74d8'],['#eeff9a','#a8c058'],['#ffb060','#ff5a20'],['#e8a8ff','#9a4aff']].forEach(([rim,tint],i)=>Object.assign(ZONES[i],{rim,tint}));
 const FOES_ALL=[].concat(...ZONES.slice(0,5).map(z=>z.foes));
 const BOSSES=ZONES.slice(0,5).map(z=>z.boss);
 
 /* ================= état / sauvegarde ================= */
 const SAVE='enclume-errance-v1';
-function fresh(){return{gold:40,lvl:1,xp:0,potions:2,ores:{1:8,2:2},parts:[{id:uid(),k:'garde',r:0}],bps:{epee:1,casque:1,bouclier:1},molds:[],items:[],equip:{arme:null,casque:null,armure:null,bouclier:null},unlocked:1,best:[0,0,0,0,0,0],run:null,st:{runs:0,deaths:0,forged:0,chests:0,kills:0},sk:{forge:{l:1,x:0},escrime:{l:1,x:0},endurance:{l:1,x:0},survie:{l:1,x:0}}}}
+function fresh(){return{frag:0,mast:{},gold:40,lvl:1,xp:0,potions:2,ores:{1:8,2:2},parts:[{id:uid(),k:'garde',r:0}],bps:{epee:1,casque:1,bouclier:1},molds:[],items:[],equip:{arme:null,casque:null,armure:null,bouclier:null},unlocked:1,best:[0,0,0,0,0,0],run:null,st:{runs:0,deaths:0,forged:0,chests:0,kills:0},sk:{forge:{l:1,x:0},escrime:{l:1,x:0},endurance:{l:1,x:0},survie:{l:1,x:0}}}}
 let S;try{S=JSON.parse(localStorage.getItem(SAVE))}catch(e){S=null}
 if(!S||!S.equip)S=fresh();
 if(S.run){S.run.plan=S.run.plan||{};if(S.run.ph==='combat'&&!S.run.enemy)S.run.ph='choice'}
+const mastKey=it=>it.type+'|'+it.tier+'|'+it.rar;
 function save(){try{localStorage.setItem(SAVE,JSON.stringify(S))}catch(e){}}
+S.frag=S.frag||0;S.mast=S.mast||{};for(const it of S.items){it.stars=it.stars||0;it.bonus=it.bonus||[];S.mast[mastKey(it)]=1}
 if(!S.sk){const l=Math.max(1,S.lvl||1);S.sk={forge:{l:1+Math.floor((S.st&&S.st.forged||0)/3),x:0},escrime:{l,x:0},endurance:{l,x:0},survie:{l:1,x:0}}}
 let TAB=S.run?'exp':'forge', MAPSEL=Math.min(S.unlocked-1,5);
 let F={bp:null,ore:null,mold:null,parts:[]};
@@ -276,14 +300,39 @@ let BUSY=false;
 
 /* ================= stats ================= */
 const itemById=id=>S.items.find(i=>i.id===id);
+/* ---------- étoiles, stats bonus, lumière, maîtrise, puissance ---------- */
+const STAR_K=.12,MAXSTAR=5;
+const BONUS={
+ atkp:{n:'ATQ',u:' %',v:(t,r)=>r1(3+t*.8+r)},hp:{n:'PV',u:'',v:(t,r)=>Math.round(8*Math.pow(1.4,t-1)*(1+r*.2))},
+ crit:{n:'Critique',u:' %',v:(t,r)=>r1(2+r*.8)},cdmg:{n:'Dégâts critiques',u:' %',v:(t,r)=>Math.round(8+t*2+r*3)},
+ light:{n:'Lumière',u:'',v:(t,r)=>Math.round(6+t*3+r*2)},dbl:{n:'Double frappe',u:' %',v:(t,r)=>r1(2+r*.8)},
+ ls:{n:'Vol de vie',u:' %',v:(t,r)=>r1(1.5+r*.6)},def:{n:'DÉF',u:'',v:(t,r)=>r1(.8*Math.pow(1.45,t-1)*(1+r*.2))}};
+function rollBonus(tier,rar){const n=Math.min(3,rar);return Object.keys(BONUS).sort(()=>R()-.5).slice(0,n).map(k=>({k,v:BONUS[k].v(tier,rar)}))}
+const itemLight=it=>Math.round((3+it.tier*4+it.rar*5)*(1+.2*(it.stars||0)));
+function eff(it){const m=1+STAR_K*(it.stars||0);
+  const o={atk:r1(it.atk*m),def:r1(it.def*m),hp:Math.round(it.hp*m),crit:it.crit,ls:it.ls,block:it.block,stun:it.stun,vsH:it.vsH,vsM:it.vsM,cdmg:0,dbl:0,atkp:0,light:itemLight(it)};
+  for(const b of it.bonus||[]){const v=['hp','def','light'].includes(b.k)?b.v*m:b.v;o[b.k]=b.k==='hp'||b.k==='light'?Math.round((o[b.k]||0)+v):r1((o[b.k]||0)+v)}
+  return o}
+function mastPts(){let p=0;for(const k in S.mast)p+=1+(+k.split('|')[2]);return p}
+const mastLvl=()=>Math.floor(Math.sqrt(mastPts()*1.5));
+const mastNext=L=>Math.ceil((L+1)*(L+1)/1.5);
+function addMastery(it){const k=mastKey(it);if(S.mast[k])return 0;S.mast[k]=1;const g=1+it.rar,before=mastLvl();
+  setTimeout(()=>toast(`Nouvelle entrée dans ta collection ! Maîtrise +${g}`+(mastLvl()>before?` · niveau ${mastLvl()} !`:'')),1200);return g}
 function stats(){
-  const ES=SL('escrime'),EN=SL('endurance');
-  const s={hpMax:80+10*EN,atk:3+ES,def:r1(.5*(EN-1)),crit:5+.5*(ES-1),ls:0,block:0,stun:0,vsH:0,vsM:0};
-  for(const sl in S.equip){const it=itemById(S.equip[sl]);if(!it||it.dur<=0)continue;
-    s.atk+=it.atk;s.def+=it.def;s.hpMax+=it.hp;s.crit+=it.crit;s.ls+=it.ls;s.block+=it.block;s.stun+=it.stun;s.vsH+=it.vsH;s.vsM+=it.vsM}
-  s.atk=r1(s.atk*(1+.02*(ES-1)));s.def=r1(s.def);s.crit=Math.min(75,s.crit);s.block=Math.min(60,s.block);s.stun=Math.min(50,s.stun);s.ls=Math.min(40,s.ls);
+  const ES=SL('escrime'),EN=SL('endurance'),ML=mastLvl();
+  const s={hpMax:80+10*EN,atk:3+ES,def:r1(.5*(EN-1)),crit:5+.5*(ES-1),ls:0,block:0,stun:0,vsH:0,vsM:0,cdmg:75+(ES>=10?25:0),dbl:0,atkp:0,light:0,stars:0};
+  for(const sl in S.equip){const it=itemById(S.equip[sl]);if(!it||it.dur<=0)continue;const o=eff(it);s.stars+=it.stars||0;
+    for(const k of ['atk','def','crit','ls','block','stun','vsH','vsM','cdmg','dbl','atkp','light'])s[k]+=o[k]||0;s.hpMax+=o.hp||0}
+  s.atk=r1(s.atk*(1+.02*(ES-1)+s.atkp/100)*(1+.01*ML));s.hpMax=Math.round(s.hpMax*(1+.01*ML));s.def=r1(s.def);
+  s.crit=Math.min(75,r1(s.crit));s.block=Math.min(60,s.block);s.stun=Math.min(50,s.stun);s.ls=Math.min(40,r1(s.ls));s.dbl=Math.min(40,r1(s.dbl));s.cdmg=Math.round(s.cdmg);s.light=Math.round(s.light);
+  s.ml=ML;s.pr=Math.round(s.atk*5+s.def*8+s.hpMax*.6+s.crit*4+(s.cdmg-75)*1.2+s.dbl*5+s.ls*4+s.block*3+s.stun*3+(s.vsH+s.vsM)*.5+s.light*2+15*ML+8*s.stars);
   return s;
 }
+const RANKS=[[0,'Apprenti'],[200,'Compagnon'],[450,'Forgeron'],[900,'Maître forgeron'],[1600,'Grand maître'],[2800,'Légende de l\'enclume'],[4500,'Forgeur d\'étoiles'],[7500,'Titan de la forge']];
+const rankOf=pr=>{let i=0;for(let k=0;k<RANKS.length;k++)if(pr>=RANKS[k][0])i=k;return i};
+const totalStars=()=>S.items.reduce((a,it)=>a+(it.stars||0),0);
+const starCost=it=>{const n=(it.stars||0)+1;return{frag:n*(1+it.tier),gold:Math.round(15*n*n*it.tier)}};
+function darkness(s){const r=S.run;if(!r)return 0;const rec=ZONES[r.zone].light+(r.zone===5?r.depth*3:0);return rec?clamp((rec-s.light)/rec,0,.7):0}
 /* ---------- compétences ---------- */
 const SL=k=>(S.sk&&S.sk[k]?S.sk[k].l:1);
 const skNeed=l=>Math.round(30*Math.pow(l,1.6));
@@ -297,7 +346,7 @@ const SK={
  escrime:{n:'Escrime',col:'#e0533a',how:'Monte en frappant les ennemis et en les achevant.',
    now:L=>[`ATQ de base +${L-1}`,`Attaque totale +${2*(L-1)} %`,`Critique +${r1(.5*(L-1))} %`],
    next:'+1 ATQ, +2 % d\'attaque totale, +0,5 % de critique',
-   ms:[[5,'Le coup lourd ne rate plus jamais'],[10,'Coups critiques ×2 au lieu de ×1,75']]},
+   ms:[[5,'Le coup lourd ne rate plus jamais'],[10,'Dégâts critiques +25 %']]},
  endurance:{n:'Endurance',col:'#4aa3df',how:'Monte en encaissant, en bloquant et en parant les coups.',
    now:L=>[`PV max +${10*(L-1)}`,`DÉF de base +${r1(.5*(L-1))}`],
    next:'+10 PV max, +0,5 DÉF',
@@ -331,7 +380,7 @@ function makeItem(type,lvl,tier,q,mold,parts,named=true){
   const T=TYPES[type],tm=Math.pow(1.55,tier-1),bm=1+0.15*(lvl-1),qm=0.6+0.7*q/100;
   let rar=Math.max(mold?mold.r:0,0,...parts.map(p=>p.r));if(q>=(SL('forge')>=8?90:95))rar++;rar=Math.min(5,rar);
   const fb=.03*(SL('forge')-1),k=tm*bm*qm*(1+0.1*rar+(mold?0.05*(mold.r+1):0))*(1+fb);
-  const it={id:uid(),type,slot:T.slot,tier,q,rar,lvl,atk:r1((T.atk||0)*k),def:r1((T.def||0)*k),hp:Math.round((T.hp||0)*k),crit:T.crit||0,ls:0,block:T.block||0,stun:T.stun||0,vsH:0,vsM:0,parts:parts.map(p=>({k:p.k,r:p.r}))};
+  const it={id:uid(),type,slot:T.slot,tier,q,rar,lvl,stars:0,bonus:rollBonus(tier,rar),atk:r1((T.atk||0)*k),def:r1((T.def||0)*k),hp:Math.round((T.hp||0)*k),crit:T.crit||0,ls:0,block:T.block||0,stun:T.stun||0,vsH:0,vsM:0,parts:parts.map(p=>({k:p.k,r:p.r}))};
   parts.forEach(p=>PARTS[p.k].ap(it,p.r,tier));
   it.durMax=50+10*tier;it.dur=it.durMax;it.fl=Math.round(fb*100);
   it.name=`${T.n} en ${oreN(tier).toLowerCase()}`+(named&&rar>=2?` « ${pick(EPI)} »`:'');
@@ -339,15 +388,18 @@ function makeItem(type,lvl,tier,q,mold,parts,named=true){
   return it;
 }
 function itemStatsHtml(it){
-  const a=[];if(it.atk)a.push(`ATQ ${it.atk}`);if(it.def)a.push(`DÉF ${it.def}`);if(it.hp)a.push(`PV +${it.hp}`);
+  const o=eff(it),a=[];if(o.atk)a.push(`ATQ ${o.atk}`);if(o.def)a.push(`DÉF ${o.def}`);if(o.hp)a.push(`PV +${o.hp}`);
   if(it.crit)a.push(`Crit ${it.crit}%`);if(it.ls)a.push(`Vol de vie ${it.ls}%`);if(it.block)a.push(`Blocage ${it.block}%`);if(it.stun)a.push(`Étourdir ${it.stun}%`);
-  if(it.vsH)a.push(`vs humains +${it.vsH}%`);if(it.vsM)a.push(`vs monstres +${it.vsM}%`);
-  return `<div class="statl">${a.map(x=>`<span>${x}</span>`).join('')}</div>`;
+  if(it.vsH)a.push(`vs humains +${it.vsH}%`);if(it.vsM)a.push(`vs monstres +${it.vsM}%`);a.push(`Lumière ${itemLight(it)}`);
+  const bn=(it.bonus||[]).map(b=>`<span class="bn">+${b.v}${BONUS[b.k].u} ${BONUS[b.k].n}</span>`);
+  return `<div class="statl">${a.map(x=>`<span>${x}</span>`).join('')}${bn.join('')}</div>`;
 }
+const starsTxt=n=>'★'.repeat(n||0)+'☆'.repeat(MAXSTAR-(n||0));
+const starsHtml=n=>`<div class="stars">${'★'.repeat(n||0)}<span class="off">${'★'.repeat(MAXSTAR-(n||0))}</span></div>`;
 function itemCard(it,actions='',eq=false){
   const dp=it.dur/it.durMax;
-  return `<div class="item ${eq?'eq':''}"><div class="art" style="--rb:${RBG[it.rar]}"><img alt="" src="${itemIcon(it.type,it.tier,it.rar)}"></div><div class="body">
-    <div class="n rar${it.rar}">${esc(it.name)}</div>
+  return `<div class="item ${eq?'eq':''}"><div class="art" style="--rb:${RBG[it.rar]}"><img alt="" src="${itemIcon(it.type,it.tier,it.rar)}">${starsHtml(it.stars)}</div><div class="body">
+    <div class="n rar${it.rar}">${esc(it.name)}${it.stars?`<span class="st">${'★'.repeat(it.stars)}</span>`:''}</div>
     <div class="m">${TYPES[it.type].n} rang ${roman(it.lvl)} · <span class="pill rar${it.rar}">${RAR[it.rar]}</span> · Qualité ${it.q} (${QLBL(it.q)})</div>
     ${itemStatsHtml(it)}
     ${it.fl?`<div class="m">Affiné par le forgeron : <b>+${it.fl} %</b></div>`:''}
@@ -363,7 +415,8 @@ function rollRarity(zone,depth,min=0){
 }
 function oreTierFor(zone,depth,r){let t=zone+1;if(r>=3)t++;if(R()<depth*0.03)t++;if(R()<0.3)t--;return clamp(t,1,8)}
 function lootEntry(zone,depth,r,forced){
-  const x=R(),kind=forced||(x<0.38?'ore':x<0.62?'part':x<0.75?'bp':x<0.86?'mold':'potion');
+  const x=R(),kind=forced||(x<0.34?'ore':x<0.54?'part':x<0.65?'bp':x<0.75?'mold':x<0.89?'frag':'potion');
+  if(kind==='frag')return{t:'frag',q:ri(1,2)+zone+Math.floor(r/2)};
   if(kind==='ore')return{t:'ore',tier:oreTierFor(zone,depth,r),q:ri(2,4)+Math.floor(r/2)};
   if(kind==='part')return{t:'part',k:pick(Object.keys(PARTS)),r:Math.max(0,r-ri(0,1))};
   if(kind==='bp')return{t:'bp',type:pick(Object.keys(TYPES)),lvl:Math.max(1,zone*2+Math.floor(depth/3)+ri(0,1+r))};
@@ -376,7 +429,7 @@ function chestLoot(zone,depth,r){
 }
 function lootIcon(e){
   if(e.t==='ore')return oreIcon(e.tier);if(e.t==='part')return partIcon(e.k,e.r);if(e.t==='bp')return bpIcon(e.type);
-  if(e.t==='mold')return moldIcon(e.r);if(e.t==='gold')return goldIcon();return potionIcon();
+  if(e.t==='mold')return moldIcon(e.r);if(e.t==='gold')return goldIcon();if(e.t==='frag')return fragIcon();return potionIcon();
 }
 function lootText(e){
   if(e.t==='ore')return`${e.q} × ${oreN(e.tier)}`;
@@ -384,6 +437,7 @@ function lootText(e){
   if(e.t==='bp')return`<b>Schéma : ${TYPES[e.type].n} rang ${roman(e.lvl)}</b>`;
   if(e.t==='mold')return`<b class="rar${e.r}">Moule ${RAR[e.r].toLowerCase()}</b> <span class="muted small">+${e.r>=3?2:1} pièce, stats +${5*(e.r+1)} %</span>`;
   if(e.t==='gold')return`<b style="color:var(--r4)">${e.q} pièces d'or</b>`;
+  if(e.t==='frag')return`<b style="color:#c8820a">${e.q} × Fragment d'étoile</b>`;
   return`${e.q} × Potion de soin`;
 }
 const lootLabel=e=>`<img class="ic" alt="" src="${lootIcon(e)}"> <span>${lootText(e)}</span>`;
@@ -397,6 +451,7 @@ function bankLoot(L){
     else if(e.t==='mold')S.molds.push({id:uid(),r:e.r});
     else if(e.t==='gold')S.gold+=e.q;
     else if(e.t==='potion')S.potions+=e.q;
+    else if(e.t==='frag')S.frag+=e.q;
     else if(e.t==='bp'){const cur=S.bps[e.type]||0;if(e.lvl>cur){S.bps[e.type]=e.lvl;notes.push(`Nouveau schéma : ${TYPES[e.type].n} rang ${roman(e.lvl)}`)}else{const g=10*e.lvl;S.gold+=g;notes.push(`Schéma ${TYPES[e.type].n} ${roman(e.lvl)} en double, revendu ${g} or`)}}
   }
   return notes;
@@ -803,6 +858,7 @@ const partIcon=(k,r)=>icon('p'+k+r,()=>{E(0,0,32,32,RCOL[r],4);E(0,0,26,26,'#6e6
 const moldIcon=r=>icon('m'+r,()=>{RR(-34,-40,68,80,10,'#c2a47a',4);RR(-34,-40,68,10,5,RCOL[r],3);RR(-34,30,68,10,5,RCOL[r],3);G.save();G.scale(.55,.55);G.translate(0,4);silFill('epee','#2a2430',0);G.translate(2,3);G.globalAlpha=.35;silFill('epee','#000000',0);G.restore()});
 const bpIcon=type=>icon('b'+type,()=>{RR(-30,-30,60,60,6,'#4a8ad0',4);for(let i=-20;i<=20;i+=10){LN(-26,i,26,i,'#ffffff33',1.5);LN(i,-26,i,26,'#ffffff33',1.5)}E(-30,0,6,32,'#3a6aa8',3);E(30,0,6,32,'#3a6aa8',3);G.save();G.scale(.42,.42);for(const f of silShapes(type)){G.beginPath();f();G.closePath();G.strokeStyle='#fff';G.lineWidth=5;G.stroke()}G.restore()});
 const potionIcon=()=>icon('pot',()=>{RR(-7,-34,14,14,3,'#c9a06a');E(0,8,24,24,'#e0e8f0',3);G.beginPath();G.arc(0,8,20,0.2,Math.PI-0.2);G.closePath();fs('#e0393a',0);E(-8,0,5,7,'#ffffffaa',0);RR(-9,-38,18,7,3,'#8a5a2b')});
+const fragIcon=()=>icon('frag',()=>{G.save();G.rotate(-.2);PL([0,-34,10,-10,34,-6,14,8,20,34,0,20,-20,34,-14,8,-34,-6,-10,-10],'#ffd24a',3.2);PL([0,-16,5,-4,16,-2,6,4,9,16,0,9,-9,16,-6,4,-16,-2,-5,-4],'#fff3b0',0);G.restore();SPARK(26,-24,7);SPARK(-26,22,5)});
 const goldIcon=()=>icon('gold',()=>{for(let i=0;i<3;i++){E(-8+i*8,16-i*12,18,7,'#e8a52a');E(-8+i*8,12-i*12,18,7,'#ffd24a')}E(8,-10,18,18,'#ffd24a');E(8,-10,11,11,null,2.5)});
 
 /* ================= héros ================= */
@@ -831,11 +887,68 @@ function openModal(h){$('#modalBody').innerHTML=h;$('#modal').hidden=false}
 function closeModal(){$('#modal').hidden=true;$('#modalBody').innerHTML=''}
 function chips(){
   const s=stats(),hp=S.run?Math.max(0,Math.ceil(S.run.hp)):s.hpMax;
-  $('#chips').innerHTML=Object.keys(SK).map(k=>{const q=S.sk[k];return`<button class="chip skchip" data-a="tab" data-v="skills" title="${SK[k].n} niveau ${q.l}" style="--sc:${SK[k].col}">${SKI[k]}${q.l}<span class="xpbar"><i style="width:${q.x/skNeed(q.l)*100}%"></i></span></button>`}).join('')+`  <span class="chip">${SV.hp}${hp}/${Math.round(s.hpMax)}</span><span class="chip">${SV.atk}${s.atk}</span><span class="chip">${SV.def}${s.def}</span>
+  $('#chips').innerHTML=`<button class="chip pr" data-a="tab" data-v="rank" title="Puissance"><b>PUISSANCE</b>${fmt(s.pr)}</button><span class="chip lt" title="Lumière">☀ ${s.light}</span><span class="chip" title="Fragments d'étoile" style="color:#ffd24a">✦ ${S.frag}</span>`+Object.keys(SK).map(k=>{const q=S.sk[k];return`<button class="chip skchip" data-a="tab" data-v="skills" title="${SK[k].n} niveau ${q.l}" style="--sc:${SK[k].col}">${SKI[k]}${q.l}<span class="xpbar"><i style="width:${q.x/skNeed(q.l)*100}%"></i></span></button>`}).join('')+`  <span class="chip">${SV.hp}${hp}/${Math.round(s.hpMax)}</span>
   <span class="chip">${SV.gold}${fmt(S.gold)}</span><span class="chip">${SV.pot}${S.potions}</span>`;
-  document.querySelectorAll('#nav button').forEach(b=>{b.classList.toggle('on',b.dataset.v===TAB);b.disabled=(!!S.run&&b.dataset.v!=='exp'&&b.dataset.v!=='equip'&&b.dataset.v!=='skills')||(!!MG&&b.dataset.v!=='forge')});
+  document.querySelectorAll('#nav button').forEach(b=>{b.classList.toggle('on',b.dataset.v===TAB);b.disabled=(!!S.run&&!['exp','equip','skills','rank'].includes(b.dataset.v))||(!!MG&&b.dataset.v!=='forge')});
 }
-function render(){chips();$('#main').innerHTML=({forge:vForge,equip:vEquip,exp:vExp,market:vMarket,skills:vSkills})[TAB]();const lg=$('#log');if(lg)lg.scrollTop=lg.scrollHeight;save()}
+/* ================= classement partagé entre joueurs ================= */
+/* Chaque joueur écrit sa propre ligne (classement/<son id>) ; tout le monde lit le classement. */
+const LB={db:null,user:null,me:null,rows:[],names:{},state:'loading',sort:'pr',sent:'',timer:0,canWrite:null,err:null};
+const LBS={pr:['Puissance',r=>r.pr],stars:['Étoiles',r=>r.stars],abyss:['Abysse',r=>r.abyss],mast:['Maîtrise',r=>r.mast]};
+function myScore(){const s=stats();return{pr:s.pr,stars:totalStars(),abyss:S.best[5]||0,mast:mastLvl(),rank:rankOf(s.pr)}}
+(async()=>{
+  if(!window.claude||!window.claude.use){LB.state='off';return}
+  const to=setTimeout(()=>{if(LB.state==='loading'){LB.state='off';if(TAB==='rank')render()}},10000);
+  try{
+    const[db,user]=await Promise.all([claude.use('db'),claude.use('user')]);
+    if(!db||!user){clearTimeout(to);LB.state='off';if(TAB==='rank')render();return}
+    LB.db=db;LB.user=user;LB.me=await user.id();LB.canWrite=await user.can('data.write');
+    db.collection('classement').limit(500).onSnapshot(q=>{clearTimeout(to);LB.rows=q.docs.map(d=>Object.assign({id:d.id},d.data()));LB.state='ok';lbNames();if(TAB==='rank')render();else chips()},
+      e=>{clearTimeout(to);LB.state='err';LB.err=e&&e.code;if(TAB==='rank')render()});
+    pushScore();
+  }catch(e){clearTimeout(to);LB.state='off';if(TAB==='rank')render()}
+})();
+async function lbNames(){if(!LB.user)return;try{const ids=LB.rows.map(r=>r.id);const ps=await LB.user.profiles(ids);let ch=false;for(const id of ids){const n=(ps[id]&&ps[id].name)||'';if(LB.names[id]!==n){LB.names[id]=n;ch=true}}if(ch&&TAB==='rank')render()}catch(e){}}
+function pushScore(){
+  if(!LB.db||!LB.me||LB.canWrite===false)return;clearTimeout(LB.timer);
+  LB.timer=setTimeout(()=>{const sc=myScore(),k=JSON.stringify(sc);if(k===LB.sent)return;LB.sent=k;
+    LB.db.doc('classement/'+LB.me).set(Object.assign(sc,{t:Date.now()})).then(()=>{LB.err=null}).catch(e=>{LB.sent='';LB.err=e&&e.code;if(e&&(e.code==='permission_denied'||e.code==='not_granted'))LB.canWrite=false;if(TAB==='rank')render()})},2500);
+}
+function myPlace(key){const f=LBS[key][1],rows=[...LB.rows].sort((a,b)=>(f(b)||0)-(f(a)||0));const i=rows.findIndex(r=>r.id===LB.me);return i<0?null:i+1}
+function vRank(){
+  const s=stats(),ri0=rankOf(s.pr),nx=RANKS[ri0+1],mp=mastPts(),ml=mastLvl(),nm=mastNext(ml),total=Object.keys(TYPES).length*8*6;
+  const me=myScore();
+  let board='';
+  if(LB.state==='loading')board='<p class="muted">Connexion au classement…</p>';
+  else if(LB.state==='off')board='<p class="muted">Le classement partagé n\'est disponible que sur la page publiée, connecté à claude.ai. Ta progression reste enregistrée dans ce navigateur.</p>';
+  else if(LB.state==='err')board=`<p class="muted">Le classement n'a pas pu être chargé (${esc(LB.err||'erreur')}).</p>`;
+  else{
+    const f=LBS[LB.sort][1];let rows=[...LB.rows];if(LB.me&&!rows.find(r=>r.id===LB.me))rows.push(Object.assign({id:LB.me,local:1},me));
+    rows.sort((a,b)=>(f(b)||0)-(f(a)||0));
+    board=`<div class="seg">${Object.entries(LBS).map(([k,[n]])=>`<button class="btn sm ${LB.sort===k?'gold':'wood'}" data-a="lbsort" data-v="${k}">${n}</button>`).join('')}</div>
+      <div class="lb">${rows.slice(0,50).map((r,i)=>{const mine=r.id===LB.me,n=mine?'Toi':(LB.names[r.id]||'Forgeron anonyme'),v=f(r)||0;
+        return`<div class="lbrow ${mine?'me':''}"><span class="pos ${i<3?'p'+(i+1):''}">${i<3?['①','②','③'][i]:'#'+(i+1)}</span><span class="who">${esc(n)} <span class="small muted">· ${RANKS[r.rank||0][1]}</span></span><span class="val">${LB.sort==='stars'?v+' ★':LB.sort==='abyss'?'prof. '+v:LB.sort==='mast'?'niv. '+v:fmt(v)}</span></div>`}).join('')}</div>
+      ${LB.canWrite===false?'<div class="hint small">Ton accès à cette page est en lecture seule : tu vois le classement mais ton score n\'y est pas enregistré. Demande l\'accès « Contributeur » au propriétaire pour y entrer.</div>':''}
+      <div class="small muted">${LB.rows.length} forgeron${LB.rows.length>1?'s':''} classé${LB.rows.length>1?'s':''}. Ton score se met à jour tout seul quand tu progresses.</div>`;
+  }
+  return `<div class="grid2"><div class="stack">
+    <div class="frame stack" style="align-items:flex-start"><div class="lbl">Ta puissance</div><div class="prbig">${fmt(s.pr)}</div>
+      <div class="title-rank">${RANKS[ri0][1]}</div>
+      ${nx?`<div style="width:100%"><div class="small muted">Prochain titre : <b>${nx[1]}</b> à ${nx[0]} de puissance</div><div class="skbar big" style="--sc:#ffd24a"><i style="width:${clamp((s.pr-RANKS[ri0][0])/(nx[0]-RANKS[ri0][0]),0,1)*100}%"></i></div></div>`:'<div class="small ok">Titre maximum atteint !</div>'}
+      <table class="st" style="width:100%"><tr><td>Étoiles portées</td><td>${s.stars} ★ (+${8*s.stars})</td></tr><tr><td>Lumière</td><td>${s.light} (+${s.light*2})</td></tr><tr><td>Maîtrise niveau ${ml}</td><td>+${15*ml} · stats +${ml} %</td></tr><tr><td>Équipement et compétences</td><td>le reste</td></tr></table>
+      ${LB.state==='ok'&&LB.me?`<div class="small">Ta place : <b>#${myPlace('pr')||'–'}</b> en puissance · <b>#${myPlace('stars')||'–'}</b> en étoiles</div>`:''}</div>
+    <div class="frame stack"><h3>Maîtrise · niveau ${ml}</h3>
+      <div class="small muted">Chaque objet nouveau (type, minerai, rareté) entre dans ta collection. Plus il est rare, plus il rapporte. Chaque niveau donne +1 % d'ATQ et de PV, et +15 de puissance.</div>
+      <div class="skbar big" style="--sc:#8a3fc8"><i style="width:${clamp((mp-Math.ceil(ml*ml/1.5))/Math.max(1,nm-Math.ceil(ml*ml/1.5)),0,1)*100}%"></i></div>
+      <div class="small">${mp} points · prochain niveau à ${nm} · collection ${Object.keys(S.mast).length} / ${total}</div></div>
+    <div class="frame stack small"><h3>Devenir plus puissant</h3>
+      <div><b>Étoiles :</b> dans Équipement, chaque objet monte jusqu'à 5 ★ (+12 % de stats et +20 % de Lumière par étoile). Il faut des fragments d'étoile ✦ et de l'or.</div>
+      <div><b>Fragments ✦ :</b> dans les coffres, sur les élites et les gardiens, parfois sur les ennemis. Plus la région est dure, plus il y en a.</div>
+      <div><b>Lumière ☀ :</b> les régions profondes l'exigent. Chaque objet en donne selon son minerai, sa rareté et ses étoiles.</div>
+      <div><b>Stats bonus :</b> les objets peu communs et plus rares reçoivent 1 à 3 stats bonus au hasard. Forge encore pour tomber sur les meilleures.</div></div></div>
+    <div class="frame stack"><h2>Classement des forgerons</h2>${board}</div></div>`;
+}
+function render(){chips();$('#main').innerHTML=({forge:vForge,equip:vEquip,exp:vExp,market:vMarket,skills:vSkills,rank:vRank})[TAB]();pushScore();const lg=$('#log');if(lg)lg.scrollTop=lg.scrollHeight;save()}
 
 /* ---------- Forge ---------- */
 function groupParts(){const m={};for(const p of S.parts){const k=p.k+'|'+p.r;(m[k]=m[k]||{k:p.k,r:p.r,ids:[]}).ids.push(p.id)}return Object.values(m).sort((a,b)=>b.r-a.r||a.k.localeCompare(b.k))}
@@ -957,7 +1070,7 @@ function hitTarget(g){
 function nextPh(){if(!MG)return;MG.ph++;MG.t=0;MG.inter=1.4;MG.hold=false;
   FX.smithTgt=[200,470,640,760,640,470][Math.min(MGN,MG.ph)];
   if(MG.ph>=MGN){const q=Math.round(100*MG.s.reduce((a,s,i)=>a+s*PHW[i],0));
-    MG.item=makeItem(MG.type,MG.lvl,MG.tier,q,MG.mold,MG.parts);S.items.push(MG.item);S.st.forged++;MG.inter=0;MG.xp=Math.round(18*MG.tier*(.4+q/100));skXp('forge',MG.xp)}
+    MG.item=makeItem(MG.type,MG.lvl,MG.tier,q,MG.mold,MG.parts);S.items.push(MG.item);addMastery(MG.item);S.st.forged++;MG.inter=0;MG.xp=Math.round(18*MG.tier*(.4+q/100));skXp('forge',MG.xp)}
   render()}
 const heatCol=x=>{const s=[[0,'#3a1a12'],[.3,'#a0261a'],[.55,'#f06a1e'],[.78,'#ffb43c'],[1,'#fff6d0']];x=clamp(x,0,1);for(let i=1;i<s.length;i++)if(x<=s[i][0]){const a=s[i-1],b=s[i],f=(x-a[0])/(b[0]-a[0]);const h1=parseInt(a[1].slice(1),16),h2=parseInt(b[1].slice(1),16);const m=k=>Math.round(((h1>>k)&255)*(1-f)+((h2>>k)&255)*f);return`rgb(${m(16)},${m(8)},${m(0)})`}return'#fff6d0'};
 const heatHex=x=>{const m=heatCol(x).match(/\d+/g);return'#'+m.map(v=>(+v).toString(16).padStart(2,'0')).join('')};
@@ -1144,16 +1257,20 @@ function vEquip(){
   const slots=Object.entries(SLOTS).map(([k,n])=>{const it=itemById(S.equip[k]);return`<div class="slot">${it?`<img alt="" src="${itemIcon(it.type,it.tier,it.rar)}">`:''}<div style="min-width:0"><div class="k">${n}</div>${it?`<div class="rar${it.rar}" style="font-weight:900">${esc(it.name)}</div><div class="small muted">${it.dur<=0?'<b style="color:var(--red)">Brisé</b>':'Usure '+Math.round(it.dur)+'/'+it.durMax}</div>`:'<span class="muted">vide</span>'}</div></div>`}).join('');
   const items=[...S.items].sort((a,b)=>(eqIds.includes(b.id)-eqIds.includes(a.id))||a.slot.localeCompare(b.slot)||b.rar-a.rar);
   const list=items.map(it=>{const eq=eqIds.includes(it.id);
-    const acts=inRun?'':(eq?`<button class="btn sm wood" data-a="unequip" data-v="${it.id}">Retirer</button>`:`<button class="btn sm" data-a="equip" data-v="${it.id}">Équiper</button><button class="btn sm wood" data-a="salvage" data-v="${it.id}">Démonter</button><button class="btn sm gold" data-a="sell" data-v="${it.id}">Vendre ${it.val}</button>`);
+    const sc=starCost(it),can=(it.stars||0)<MAXSTAR,ok=can&&S.frag>=sc.frag&&S.gold>=sc.gold;
+    const stb=inRun||!can?'':`<button class="btn sm gold" data-a="star" data-v="${it.id}" ${ok?'':'disabled'} title="Étoile ${(it.stars||0)+1}">★ ${(it.stars||0)+1} · ${sc.frag} ✦ · ${sc.gold} or</button>`;
+    const acts=stb+(inRun?'':(eq?`<button class="btn sm wood" data-a="unequip" data-v="${it.id}">Retirer</button>`:`<button class="btn sm" data-a="equip" data-v="${it.id}">Équiper</button><button class="btn sm wood" data-a="salvage" data-v="${it.id}">Démonter</button><button class="btn sm gold" data-a="sell" data-v="${it.id}">Vendre ${it.val}</button>`));
     return itemCard(it,(eq?'<span class="pill" style="color:var(--r4)">Équipé</span>':'')+acts,eq)}).join('');
   const ores=ORES.map((o,i)=>S.ores[i+1]?`<span><img alt="" src="${oreIcon(i+1)}">${o.n} ×${S.ores[i+1]}</span>`:'').join('');
   return `<div class="grid2"><div class="stack">
     <div class="frame stack"><h2>Ton héros · niveau ${heroLvl()}</h2>
       <div class="cardrow"><canvas id="heroCard" class="cardcv" data-card="hero" width="220" height="300"></canvas><div class="small muted" style="flex:1;min-width:0">Ta carte de héros montre ce que tu portes vraiment : arme, casque, cuirasse et bouclier forgés apparaissent sur elle, avec la couleur de leur minerai.</div></div>
       <div class="slots">${slots}</div>
-      <table class="st"><tr><td>PV max</td><td>${Math.round(s.hpMax)}</td></tr><tr><td>Attaque</td><td>${s.atk}</td></tr><tr><td>Défense</td><td>${s.def}</td></tr><tr><td>Critique</td><td>${s.crit} %</td></tr><tr><td>Blocage</td><td>${s.block} %</td></tr><tr><td>Étourdir</td><td>${s.stun} %</td></tr><tr><td>Vol de vie</td><td>${s.ls} %</td></tr><tr><td>Dégâts vs humains</td><td>+${s.vsH} %</td></tr><tr><td>Dégâts vs monstres</td><td>+${s.vsM} %</td></tr></table>
+      <div class="row" style="justify-content:space-between"><span class="disp" style="font-size:1.4rem">Puissance <span style="color:var(--r4)">${s.pr}</span></span><span class="small muted">${RANKS[rankOf(s.pr)][1]} · ${s.stars} ★ portées · Maîtrise ${s.ml}</span></div>
+      <table class="st"><tr><td>PV max</td><td>${Math.round(s.hpMax)}</td></tr><tr><td>Attaque</td><td>${s.atk}</td></tr><tr><td>Dégâts critiques</td><td>+${s.cdmg} %</td></tr><tr><td>Double frappe</td><td>${s.dbl} %</td></tr><tr><td>Lumière</td><td>${s.light}</td></tr><tr><td>Défense</td><td>${s.def}</td></tr><tr><td>Critique</td><td>${s.crit} %</td></tr><tr><td>Blocage</td><td>${s.block} %</td></tr><tr><td>Étourdir</td><td>${s.stun} %</td></tr><tr><td>Vol de vie</td><td>${s.ls} %</td></tr><tr><td>Dégâts vs humains</td><td>+${s.vsH} %</td></tr><tr><td>Dégâts vs monstres</td><td>+${s.vsM} %</td></tr></table>
       <div class="small muted">Expéditions ${S.st.runs} · Morts ${S.st.deaths} · Objets forgés ${S.st.forged} · Ennemis vaincus ${S.st.kills}</div></div>
     <div class="frame stack"><h3>Réserves</h3><div class="ores">${ores||'<span class="muted small">Pas de minerai</span>'}</div>
+      <div class="small"><b>Fragments d'étoile :</b> ${S.frag} ✦ <span class="muted">(coffres, élites, gardiens, et parfois les ennemis)</span></div>
       <div class="small"><b>Schémas :</b> ${Object.entries(S.bps).map(([k,l])=>`${TYPES[k].n} ${roman(l)}`).join(' · ')}</div>
       <div class="small"><b>Moules :</b> ${S.molds.length?S.molds.map(m=>`<b class="rar${m.r}">${RAR[m.r]}</b>`).join(', '):'aucun'}</div>
       <div class="resv">${groupParts().map(g=>`<div class="sel" style="cursor:default"><img alt="" src="${partIcon(g.k,g.r)}"><span style="min-width:0"><span class="t rar${g.r}">${PARTS[g.k].n} ×${g.ids.length}</span><span class="small muted">${PARTS[g.k].d(g.r)}</span>${inRun?'':`<br><button class="btn sm gold" data-a="sellpart" data-v="${g.k}|${g.r}">Vendre ${10*(g.r+1)*(g.r+1)}</button>`}</span></div>`).join('')}</div></div></div>
@@ -1201,6 +1318,7 @@ function vExp(){
     <div class="grid2"><div class="frame stack"><div class="cardrow"><canvas class="cardcv" data-card="boss" width="220" height="300"></canvas><div class="stack" style="flex:1;min-width:0"><h2>${z.n}</h2><div class="muted">${z.d}</div></div></div>
       <div class="small"><b>Minerais :</b> ${MAPSEL<5?`${oreN(MAPSEL+1)}, ${oreN(MAPSEL+2)}`:'tous les paliers'} · <b>Record :</b> profondeur ${S.best[MAPSEL]||0}</div>
       <div class="small"><b>Gardien :</b> ${ENEM[z.boss].n}</div>
+      ${(()=>{const st=stats();return`<div class="small"><b>Puissance recommandée :</b> <span class="${st.pr>=z.pr?'ok':'warn'}">${z.pr}</span> (toi : ${st.pr})${z.light?` · <b>Lumière :</b> <span class="${st.light>=z.light?'ok':'warn'}">${z.light}${MAPSEL===5?'+':''}</span> (toi : ${st.light})`:''}</div>${z.light&&st.light<z.light?'<div class="small warn">Sans assez de Lumière, les ténèbres renforcent les ennemis et affaiblissent tes coups.</div>':''}`})()}
       ${lock?`<div class="small" style="color:var(--red)">Verrouillé : vaincs le gardien de « ${ZONES[MAPSEL-1].n} ».</div>`:`<div class="row"><button class="btn big" data-a="depart" data-v="${MAPSEL}" ${!S.equip.arme?'disabled':''}>Partir à l'aventure</button></div>${!S.equip.arme?'<div class="small" style="color:var(--red)">Forge-toi au moins une arme avant de partir.</div>':''}`}
     </div><div class="frame stack small"><h3>Règle du risque</h3>
       <div>Après chaque étape, choisis : <b>continuer</b> (plus de danger, meilleur butin) ou <b>rentrer</b> avec tout ce que tu portes.</div>
@@ -1221,7 +1339,8 @@ function vExp(){
   else{const nx=planAt(r.depth+1),nx2=SL('survie')>=5?planAt(r.depth+2):null;prompt=`Profondeur ${r.depth} franchie. Ensuite : ${EVN[nx]}${nx==='boss'?' !':''}${nx2?`, puis ${EVN[nx2]}`:''}`;
     acts=`<button class="btn big" data-a="continue" ${BUSY?'disabled':''}>Continuer → ${r.depth+1}</button><button class="btn wood big" data-a="home" ${BUSY?'disabled':''}>Rentrer au village</button>`}
   const b=r.bag;
-  return `<div class="frame" style="padding:10px 14px"><div class="hpwrap"><span class="disp" style="font-size:1.2rem">${Z.n} · profondeur ${r.depth}</span><span></span></div>
+  const dk=darkness(s);
+  return `<div class="frame" style="padding:10px 14px"><div class="hpwrap"><span class="disp" style="font-size:1.2rem">${Z.n} · profondeur ${r.depth}</span><span class="small" style="text-align:right">${dk>0?`<span class="warn">Ténèbres : ennemis +${Math.round(dk*100)} %, tes coups −${Math.round(dk*60)} % (Lumière ${s.light})</span>`:`Lumière ${s.light}`}</span></div>
     <div class="hpwrap" style="margin-top:6px"><span class="small"><b>PV ${Math.ceil(r.hp)}/${Math.round(s.hpMax)}</b></span><div class="hpbar"><i style="width:${clamp(r.hp/s.hpMax,0,1)*100}%"></i></div></div></div>
     <canvas id="trailCv" class="cv" width="960" height="120"></canvas>
     <canvas id="sceneCv" class="cv" width="960" height="400"></canvas>
@@ -1534,12 +1653,13 @@ function cact(a){
     const heavy=a==='lourd';A.heroAtk=1;
     setTimeout(()=>{
       if(heavy&&SL('escrime')<5&&R()<.25){log('','Ton coup lourd manque sa cible.');floatTxt(EX,170,'Raté','#ddd');slash(EX-20,250,heavy,false);A.slash.miss=1}
-      else{let base=s.atk*(heavy?1.7:1)*rnd(.88,1.12)*(1+(e.kind==='humain'?s.vsH:s.vsM)/100);
-        const crit=R()<s.crit/100;if(crit)base*=SL('escrime')>=10?2:1.75;
+      else{let base=s.atk*(heavy?1.7:1)*rnd(.88,1.12)*(1+(e.kind==='humain'?s.vsH:s.vsM)/100)*(1-.6*darkness(s));
+        const crit=R()<s.crit/100;if(crit)base*=1+s.cdmg/100;
         const guard=e.intent==='garde'&&!heavy&&!e.stunned;
         let dmg=Math.max(Math.ceil(base*.1),base-e.def*.6);if(guard)dmg*=.4;dmg=Math.max(1,Math.round(dmg));
         e.hp=Math.max(0,e.hp-dmg);skXp('escrime',3*(1+r.zone)*(e.boss?1.5:1));A.ex=crit?60:heavy?44:28;A.fe=.14;A.esq=1;slash(EX,250,heavy,crit);impact(EX-10,250,KCHIP[e.kind]||'#d0403a',heavy?1.5:1,{crit,dir:-.4,ring:guard?'#9ad4ff':'#fff'});if(crit)floatTxt(EX,110,'CRITIQUE !','#ffd24a',1);floatTxt(EX,150,String(dmg),crit?'#ffd24a':heavy?'#ffb46a':'#fff',crit||heavy);
         log('',`Tu frappes ${e.n}${crit?' (critique)':''} : ${dmg} dégâts${guard?' (en partie bloqué)':''}.`);
+        if(e.hp>0&&R()<s.dbl/100){const d2=Math.max(1,Math.round(dmg*.5));e.hp=Math.max(0,e.hp-d2);setTimeout(()=>{slash(EX+10,230,false,false);impact(EX,230,KCHIP[e.kind]||'#d0403a',.7,{dir:-.2});A.esq=1;floatTxt(EX+30,180,'×2  '+d2,'#9ad4ff',1)},160);log('',`Double frappe : ${d2} dégâts de plus.`)}
         if(s.ls){const h=Math.round(dmg*s.ls/100);if(h)r.hp=Math.min(s.hpMax,r.hp+h)}
         if(e.hp>0&&R()<s.stun/100){e.stunned=true;log('y',`${e.n} est étourdi !`)}}
       render();
@@ -1554,7 +1674,7 @@ function enemyAct(){
   if(e.intent==='garde'){log('',`${e.n} reste en garde.`);finishEnemyTurn();return}
   A.enAtk=1;
   setTimeout(()=>{
-    const heavy=e.intent==='lourd';const base=e.atk*(heavy?1.8:1)*rnd(.88,1.12);
+    const heavy=e.intent==='lourd';const base=e.atk*(heavy?1.8:1)*rnd(.88,1.12)*(1+darkness(s));
     if(R()<s.block/100){log('g',`Ton bouclier bloque le coup de ${e.n} !`);floatTxt(230,160,'Bloqué !','#9ad4ff',1);impact(270,262,'#c8d0d8',.8,{ring:'#9ad4ff',spark:'#bfe6ff',dir:3.4});A.hx=-12}
     else{let dmg=Math.max(Math.ceil(base*.1),base-s.def*.6);
       if(r.parry){dmg*=heavy?.2:(SL('endurance')>=5?.3:.5);if(heavy)skXp('endurance',5*(1+r.zone));if(heavy){const cd=Math.round(s.atk*.9);e.hp=Math.max(0,e.hp-cd);log('g',`Parade parfaite ! Riposte : ${cd} dégâts.`);floatTxt(960-230,150,'Riposte '+cd,'#7cc242',1);A.fe=.12;A.esq=1;A.ex=40;impact(275,258,'#ffd24a',1.1,{ring:'#ffd24a',dir:3.4});slash(960-230,250,true,false);A.stop=.22}}
@@ -1578,7 +1698,7 @@ function killEnemy(){
 function victory(e){
   const r=S.run,m=Math.pow(1.75,r.zone)*(1+.1*r.depth);
   const gold=Math.round(ri(3,8)*m*(e.boss?4:e.elite?2:1)*(1+.05*(SL('survie')-1)));skXp('escrime',8*(1+r.zone)*(e.boss?3:1));
-  r.bag.gold+=gold;S.st.kills++;const fx=r.fxp||{};log('g',`${e.n} est vaincu ! +${gold} or. XP : ${Object.entries(fx).map(([k,v])=>`${SK[k].n} +${v}`).join(', ')}.`);r.fxp={};floatTxt(230,140,`+${gold} or`,'#ffd24a',1);
+  r.bag.gold+=gold;S.st.kills++;{const fq=e.boss?3+2*r.zone:e.elite?2+r.zone:(R()<.3?1+Math.floor(r.zone/2):0);if(fq){r.bag.list.push({t:'frag',q:fq});log('y',`+${fq} fragment${fq>1?'s':''} d'étoile.`);floatTxt(960-230,120,`+${fq} ✦`,'#ffd24a',1)}}const fx=r.fxp||{};log('g',`${e.n} est vaincu ! +${gold} or. XP : ${Object.entries(fx).map(([k,v])=>`${SK[k].n} +${v}`).join(', ')}.`);r.fxp={};floatTxt(230,140,`+${gold} or`,'#ffd24a',1);
   BUSY=false;
   if(e.boss){
     if(r.zone+1===S.unlocked&&S.unlocked<6){S.unlocked++;log('y',`Nouvelle région ouverte : ${ZONES[S.unlocked-1].n} !`);toast(`Nouvelle région : ${ZONES[S.unlocked-1].n}`)}
@@ -1724,7 +1844,7 @@ requestAnimationFrame(loop);
 
 /* ================= actions ================= */
 const ACT={
-  tab:v=>{if(S.run&&v!=='exp'&&v!=='equip'&&v!=='skills')return;if(MG&&v!=='forge')return;TAB=v;render()},
+  tab:v=>{if(S.run&&!['exp','equip','skills','rank'].includes(v))return;if(MG&&v!=='forge')return;TAB=v;render()},
   close:()=>{closeModal();render()},
   goForge:()=>{closeModal();TAB='forge';render()},
   fbp:v=>{F.bp=v;render()},fore:v=>{F.ore=+v;render()},fmold:v=>{F.mold=v||null;render()},
@@ -1738,7 +1858,10 @@ const ACT={
   equipNew:v=>{const it=itemById(v);S.equip[it.slot]=it.id;MG=null;FX.smithTgt=640;toast('Équipé : '+it.name);render()},
   unequip:v=>{const it=itemById(v);S.equip[it.slot]=null;render()},
   sell:v=>{const it=itemById(v);S.gold+=it.val;S.items=S.items.filter(x=>x!==it);toast(`Vendu ${it.val} or`);render()},
-  salvage:v=>{const it=itemById(v);const q=Math.ceil(TYPES[it.type].ore/2);S.ores[it.tier]=(S.ores[it.tier]||0)+q;const back=[];
+  star:v=>{const it=itemById(v);if(!it||S.run)return;const c=starCost(it);if((it.stars||0)>=MAXSTAR||S.frag<c.frag||S.gold<c.gold)return;S.frag-=c.frag;S.gold-=c.gold;it.stars=(it.stars||0)+1;it.val=Math.round(it.val*1.25);
+    toast(`${it.name} : ${starsTxt(it.stars)}${it.stars===MAXSTAR?' — étoiles au maximum !':''}`);render()},
+  lbsort:v=>{LB.sort=v;render()},
+  salvage:v=>{const it=itemById(v);if(it&&it.stars){const f=Math.floor(it.stars*(1+it.tier)/2);S.frag+=f}const q=Math.ceil(TYPES[it.type].ore/2);S.ores[it.tier]=(S.ores[it.tier]||0)+q;const back=[];
     for(const p of it.parts)if(R()<.6){S.parts.push({id:uid(),k:p.k,r:p.r});back.push(PARTS[p.k].n)}
     S.items=S.items.filter(x=>x!==it);toast(`Démonté : ${q} × ${oreN(it.tier)}${back.length?' + '+back.join(', '):''}`);render()},
   sellpart:v=>{const[k,r]=v.split('|');const p=S.parts.find(p=>p.k===k&&p.r===+r);if(!p)return;S.parts=S.parts.filter(x=>x!==p);S.gold+=10*(+r+1)*(+r+1);render()},

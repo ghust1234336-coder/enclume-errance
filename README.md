@@ -48,6 +48,8 @@ Style cartoon à plat : fond lavande uni, couleurs unies, une seule bande d'ombr
 | Combat | Tour par tour : frapper, coup lourd, parer, potion. L'ennemi annonce son intention. |
 | Coffres | Scène plein écran, coffres 2,5D par rareté, objets révélés un par un. 8 % de mimiques. |
 | Compétences | Forge, Escrime, Endurance, Survie. Chacune monte avec son activité et débloque des paliers. |
+| Puissance et étoiles | Inspiré de Trove. Puissance = résumé de toute la force (stats, Lumière, étoiles, maîtrise), avec des titres de forgeron. Chaque objet monte jusqu'à 5 ★ (+12 % de stats, +20 % de Lumière par étoile) avec des fragments d'étoile ✦ et de l'or. Stats bonus aléatoires selon la rareté (ATQ %, PV, critique, dégâts critiques, Lumière, double frappe, vol de vie, DÉF). Lumière exigée dans les régions profondes (sinon ténèbres : ennemis renforcés, coups affaiblis). Maîtrise : collection des objets (type × minerai × rareté), +1 % ATQ/PV par niveau. |
+| Classement | Classement partagé entre les joueurs de l'artefact publié (capacités `db` et `user`) : puissance, étoiles, profondeur dans l'Abysse, maîtrise. Chaque joueur écrit sa ligne `classement/<id>` ; il faut l'accès Contributeur pour y apparaître. Hors claude.ai, l'onglet indique que le classement n'est pas disponible. |
 | Marché | Potions, réparation, fonderie (3 minerais → 1 du palier supérieur), achat et vente de minerais. |
 
 ## Organisation du code (`index.html`)
