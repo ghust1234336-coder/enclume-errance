@@ -11,7 +11,7 @@
   --bg:#abaed1; --bgsh:#898ca6; --panel:#eeedf8; --panel2:#dcdcf0; --line:#8f93c4;
   --ink:#2a2140; --ink2:#5e5884; --parch:#eeedf8; --ol:#211b30;
   --gold:#ffd24a; --green:#7cc242; --red:#e0533a;
-  --r0:#6b6680; --r1:#2f8a3a; --r2:#1f6fc0; --r3:#8a3fc8; --r4:#b86e00; --r5:#d0203c;
+  --r0:#6b6680; --r1:#2f8a3a; --r2:#1f6fc0; --r3:#8a3fc8; --r4:#b86e00; --r5:#d0203c; --r6:#0f9e8a;
   --f-disp:'Lilita One','Trebuchet MS',Impact,sans-serif;
   --f-body:'Nunito','Segoe UI',system-ui,sans-serif;
   --dots:radial-gradient(circle,#2a214014 1px,transparent 1.3px) 0 0/7px 7px;
@@ -64,7 +64,18 @@ button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 .sel img{width:38px;height:38px;flex:none}
 .opts{display:flex;flex-wrap:wrap;gap:6px}
 .ic{width:30px;height:30px;vertical-align:middle;flex:none}
-.rar0{color:var(--r0)} .rar1{color:var(--r1)} .rar2{color:var(--r2)} .rar3{color:var(--r3)} .rar4{color:var(--r4)} .rar5{color:var(--r5)}
+.rar0{color:var(--r0)} .rar1{color:var(--r1)} .rar2{color:var(--r2)} .rar3{color:var(--r3)} .rar4{color:var(--r4)} .rar5{color:var(--r5)} .rar6{color:var(--r6)}
+.n.rar6{text-shadow:0 0 10px #3ff0d088}
+.relicgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.relic{display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;background:#f8f7fd;border:3px solid var(--line);border-radius:14px;padding:8px 6px;font-size:.78rem;min-width:0}
+.relic.own{border-color:var(--r6);background:#e6fbf7;box-shadow:0 3px 0 var(--r6)}
+.relic img{width:72px;height:72px}
+.relic .rn{font-family:var(--f-disp);font-size:.98rem;line-height:1.1}
+.relicfx{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.relicfx .rays{position:absolute;top:-10px;width:260px;height:260px;border-radius:50%;background:repeating-conic-gradient(#3ff0d055 0 12deg,transparent 12deg 24deg);animation:spin 6s linear infinite;z-index:0}
+.relicfx img{position:relative;z-index:1;width:200px;height:200px;animation:pop .6s both}
+.relicfx .big{position:relative;z-index:1;font-family:var(--f-disp);font-size:2.4rem;color:#fff;text-shadow:3px 0 0 var(--r6),-3px 0 0 var(--r6),0 3px 0 var(--r6),0 -3px 0 var(--r6),0 6px 0 var(--ol)}
+@keyframes spin{to{transform:rotate(360deg)}}
 .pill{display:inline-block;font-family:var(--f-disp);font-size:.78rem;padding:1px 7px;border-radius:999px;border:2px solid currentColor;letter-spacing:.03em}
 .item{display:flex;gap:10px;align-items:flex-start;background:#f8f7fd;border:3px solid var(--line);border-radius:14px;padding:8px;min-width:0}
 .item.eq{border-color:var(--ol);box-shadow:0 3px 0 var(--ol);background:#fff6d2}
@@ -212,9 +223,9 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const hsh=(i,s=0)=>{const x=Math.sin(i*127.1+s*311.7)*43758.5453;return x-Math.floor(x)};
 
 /* ================= données ================= */
-const RAR=['Commun','Peu commun','Rare','Épique','Légendaire','Mythique'];
-const RCOL=['#c9c4b4','#6fd36a','#58b4ff','#c47cff','#ffc23a','#ff4f6e'];
-const RBG=['#d9cfb4','#bfe6b4','#b8dcff','#e2c6ff','#ffe39a','#ffc2cc'];
+const RAR=['Commun','Peu commun','Rare','Épique','Légendaire','Mythique','Relique'];
+const RCOL=['#c9c4b4','#6fd36a','#58b4ff','#c47cff','#ffc23a','#ff4f6e','#3ff0d0'];
+const RBG=['#d9cfb4','#bfe6b4','#b8dcff','#e2c6ff','#ffe39a','#ffc2cc','#b8f5ea'];
 const ORES=[
  {n:'Cuivre',c:'#d9874a'},{n:'Fer',c:'#9aa4ae'},{n:'Argent',c:'#e8eef3'},{n:'Mithril',c:'#7fdcf5'},
  {n:'Adamantite',c:'#4fd08f'},{n:'Orichalque',c:'#f2b53a'},{n:'Obsidienne astrale',c:'#8a5ad8'},{n:'Cœur d\'étoile',c:'#ff6f9a'}];
@@ -286,13 +297,13 @@ const BOSSES=ZONES.slice(0,5).map(z=>z.boss);
 
 /* ================= état / sauvegarde ================= */
 const SAVE='enclume-errance-v1';
-function fresh(){return{frag:0,mast:{},gold:40,lvl:1,xp:0,potions:2,ores:{1:8,2:2},parts:[{id:uid(),k:'garde',r:0}],bps:{epee:1,casque:1,bouclier:1},molds:[],items:[],equip:{arme:null,casque:null,armure:null,bouclier:null},unlocked:1,best:[0,0,0,0,0,0],run:null,st:{runs:0,deaths:0,forged:0,chests:0,kills:0},sk:{forge:{l:1,x:0},escrime:{l:1,x:0},endurance:{l:1,x:0},survie:{l:1,x:0}}}}
+function fresh(){return{frag:0,mast:{},relics:{},pity:{},gold:40,lvl:1,xp:0,potions:2,ores:{1:8,2:2},parts:[{id:uid(),k:'garde',r:0}],bps:{epee:1,casque:1,bouclier:1},molds:[],items:[],equip:{arme:null,casque:null,armure:null,bouclier:null},unlocked:1,best:[0,0,0,0,0,0],run:null,st:{runs:0,deaths:0,forged:0,chests:0,kills:0},sk:{forge:{l:1,x:0},escrime:{l:1,x:0},endurance:{l:1,x:0},survie:{l:1,x:0}}}}
 let S;try{S=JSON.parse(localStorage.getItem(SAVE))}catch(e){S=null}
 if(!S||!S.equip)S=fresh();
 if(S.run){S.run.plan=S.run.plan||{};if(S.run.ph==='combat'&&!S.run.enemy)S.run.ph='choice'}
 const mastKey=it=>it.type+'|'+it.tier+'|'+it.rar;
 function save(){try{localStorage.setItem(SAVE,JSON.stringify(S))}catch(e){}}
-S.frag=S.frag||0;S.mast=S.mast||{};for(const it of S.items){it.stars=it.stars||0;it.bonus=it.bonus||[];S.mast[mastKey(it)]=1}
+S.frag=S.frag||0;S.mast=S.mast||{};S.relics=S.relics||{};S.pity=S.pity||{};for(const it of S.items){it.stars=it.stars||0;it.bonus=it.bonus||[];S.mast[mastKey(it)]=1}
 if(!S.sk){const l=Math.max(1,S.lvl||1);S.sk={forge:{l:1+Math.floor((S.st&&S.st.forged||0)/3),x:0},escrime:{l,x:0},endurance:{l,x:0},survie:{l:1,x:0}}}
 let TAB=S.run?'exp':'forge', MAPSEL=Math.min(S.unlocked-1,5);
 let F={bp:null,ore:null,mold:null,parts:[]};
@@ -300,6 +311,46 @@ let BUSY=false;
 
 /* ================= stats ================= */
 const itemById=id=>S.items.find(i=>i.id===id);
+/* ---------- reliques : objets ultra-rares liés à une région ou un gardien ----------
+   src : 'boss' (clé du gardien), 'zone' (coffres rares et élites de la région), 'champ' (champions des tanières), 'abyss' (coffres de l'Abysse dès la profondeur 15) */
+const RELICS=[
+ {id:'roinain',n:'Hache du Roi sous la Montagne',type:'hache',z:0,src:'boss',key:'chefbrigand',p:.05,c:'#c0c6cc',d:'Forgée pour un roi nain en exil. Petite main, gros coups.',b:[['atkp',15],['stun',8],['vsM',15]]},
+ {id:'lueurorc',n:'Lueur-d\'Orc',type:'dague',z:0,src:'zone',p:.012,c:'#7fc8ff',d:'Une petite lame elfique qui luit d\'un bleu froid quand les orcs approchent.',b:[['crit',12],['vsM',25],['light',30]]},
+ {id:'herosvert',n:'Lame du Héros en vert',type:'epee',z:1,src:'boss',key:'roigobelin',p:.05,c:'#8ab8ff',d:'Elle dort dans la forêt, plantée dans la pierre, en attendant un héros en tunique verte.',b:[['cdmg',40],['light',25],['vsM',20]]},
+ {id:'semihomme',n:'Cotte du Semi-homme',type:'cuirasse',z:1,src:'zone',p:.012,c:'#e8eef3',d:'Légère comme une plume, dure comme des écailles de dragon. Un héritage de famille.',b:[['hp',60],['block',8],['def',4]]},
+ {id:'durandal',n:'Durandal',type:'epee',z:2,src:'boss',key:'liche',p:.05,c:'#f2d48a',d:'L\'épée de Roland, que nul rocher ne put briser à Roncevaux.',b:[['dbl',15],['cdmg',30]]},
+ {id:'hades',n:'Casque d\'Hadès',type:'casque',z:2,src:'zone',p:.012,c:'#4a4f6a',d:'Le heaume du maître des Enfers : qui le porte se fond dans l\'ombre.',b:[['block',12],['crit',8],['light',20]]},
+ {id:'gungnir',n:'Gungnir',type:'lance',z:3,src:'boss',key:'hydre',p:.05,c:'#d8e4ff',d:'La lance d\'Odin. Une fois lancée, elle ne manque jamais sa cible.',b:[['crit',15],['dbl',10]]},
+ {id:'etoile',n:'Bouclier étoilé du Capitaine',type:'bouclier',z:3,src:'zone',p:.012,c:'#3a6ad0',d:'Rond, frappé d\'une étoile. On jure qu\'il revient toujours quand on le lance.',b:[['block',15],['stun',10],['vsH',20]]},
+ {id:'mjollnir',n:'Mjöllnir',type:'marteau',z:4,src:'boss',key:'dragon',p:.05,c:'#9ab8d8',d:'Le marteau de Thor. Seuls les dignes parviennent à le soulever.',b:[['stun',18],['atkp',20]]},
+ {id:'loupnord',n:'Griffe-de-Loup du Nord',type:'epee',z:4,src:'zone',p:.012,c:'#2a2f3a',d:'Une épée d\'acier noir au pommeau de loup. L\'hiver vient, et elle est prête.',b:[['ls',10],['vsM',30]]},
+ {id:'excalibur',n:'Excalibur',type:'epee',z:5,src:'boss',key:'horreur',p:.04,c:'#fff3b0',d:'Tirée de la pierre, rendue au lac, retrouvée au fond de l\'Abysse.',b:[['ls',8],['cdmg',50],['light',60]]},
+ {id:'sabrestellaire',n:'Sabre stellaire',type:'epee',z:5,src:'zone',p:.01,c:'#5ff0ff',d:'Forgé dans une galaxie lointaine. Sa lame de lumière bourdonne doucement.',b:[['dbl',20],['crit',15],['light',40]]},
+ {id:'egide',n:'L\'Égide',type:'bouclier',z:5,src:'abyss',p:.02,c:'#e8c86a',d:'Le bouclier d\'Athéna, orné d\'un visage qui pétrifie l\'ennemi.',b:[['block',20],['stun',12],['def',12]]},
+ {id:'chevnoir',n:'Heaume du Chevalier noir',type:'casque',z:-1,src:'champ',p:.03,c:'#1e1e28',d:'Son porteur refuse de céder, même blessé : « ce n\'est qu\'une égratignure ».',b:[['hp',120],['ls',6],['def',6]]},
+];
+const RELIC=Object.fromEntries(RELICS.map(x=>[x.id,x]));
+const relicSrc=x=>x.src==='boss'?`Gardien : ${ENEM[x.key].n}`:x.src==='zone'?`Coffres rares et élites : ${ZONES[x.z].n}`:x.src==='abyss'?'Coffres de l\'Abysse, profondeur 15 et plus':'Champions des tanières, toutes régions';
+const relicChance=x=>Math.min(.5,x.p*(1+.05*(SL('survie')-1))+(S.pity[x.id]||0));
+const relicIcon=id=>{const x=RELIC[id],t=Math.min(8,Math.max(0,x.z)+2);return icon('R'+id,()=>{G.save();G.globalAlpha=.55;for(let i=0;i<10;i++){G.rotate(Math.PI/5);PL([0,0,-7,-48,7,-48],x.c,0)}G.restore();G.save();G.shadowColor='#3ff0d0';G.shadowBlur=18;drawItem(x.type,t,x.c);G.restore();drawItem(x.type,t,x.c);SPARK(30,-30,8);SPARK(-32,26,6)})};
+const relicShadow=id=>{const x=RELIC[id],t=Math.min(8,Math.max(0,x.z)+2);return icon('S'+id,()=>{G.save();G.globalAlpha=.85;drawItem(x.type,t,'#3d3858');G.restore()})};
+const iconOf=it=>it.relic?relicIcon(it.relic):itemIcon(it.type,it.tier,it.rar);
+const itemCol=it=>it.col||oreC(it.tier);
+function makeRelic(x){
+  const zz=Math.max(0,x.z),zt=x.z<0&&S.run?S.run.zone:zz,t=Math.min(8,zt+2),it=makeItem(x.type,zt*2+3,t,100,null,[],false);
+  it.rar=6;it.atk=r1(it.atk*1.35);it.def=r1(it.def*1.35);it.hp=Math.round(it.hp*1.35);it.bonus=x.b.map(([k,v])=>({k,v}));
+  it.name=x.n;it.relic=x.id;it.col=x.c;it.desc=x.d;it.val=Math.round(it.val*3);return it}
+const RELQ=[];
+function tryRelic(x,mult=1){
+  if(!x||!S.run)return false;const ch=relicChance(x)*mult;
+  if(R()>=ch){S.pity[x.id]=(S.pity[x.id]||0)+x.p*.15*mult;return false}
+  S.pity[x.id]=0;S.relicTries=(S.relicTries||0)+1;
+  if(S.relics[x.id]){const f=25+10*Math.max(0,x.z);S.frag+=f;log('y',`Écho de relique (${x.n}, déjà possédée) : +${f} fragments d'étoile.`);toast(`Écho de ${x.n} : +${f} ✦`);return true}
+  const it=makeRelic(x);S.items.push(it);addMastery(it);S.relics[x.id]=Date.now();log('g',`RELIQUE ! ${x.n} rejoint ton arsenal.`);RELQ.push(it.id);A.stop=.4;A.zoom=.08;return true}
+function showRelic(id){const it=itemById(id);if(!it)return;
+  openModal(`<div class="relicfx"><div class="rays"></div><img alt="" src="${relicIcon(it.relic)}"><div class="big">RELIQUE !</div><h2 class="rar6">${esc(it.name)}</h2><div class="muted"><i>${esc(it.desc)}</i></div></div>${itemCard(it)}
+   <div class="small muted">Liée à ton âme : elle rentre directement au village, même si tu tombes. Collection ${Object.keys(S.relics).length} / ${RELICS.length}.</div>
+   <div class="row"><button class="btn big" data-a="close">Incroyable !</button></div>`)}
 /* ---------- étoiles, stats bonus, lumière, maîtrise, puissance ---------- */
 const STAR_K=.12,MAXSTAR=5;
 const BONUS={
@@ -307,7 +358,8 @@ const BONUS={
  crit:{n:'Critique',u:' %',v:(t,r)=>r1(2+r*.8)},cdmg:{n:'Dégâts critiques',u:' %',v:(t,r)=>Math.round(8+t*2+r*3)},
  light:{n:'Lumière',u:'',v:(t,r)=>Math.round(6+t*3+r*2)},dbl:{n:'Double frappe',u:' %',v:(t,r)=>r1(2+r*.8)},
  ls:{n:'Vol de vie',u:' %',v:(t,r)=>r1(1.5+r*.6)},def:{n:'DÉF',u:'',v:(t,r)=>r1(.8*Math.pow(1.45,t-1)*(1+r*.2))}};
-function rollBonus(tier,rar){const n=Math.min(3,rar);return Object.keys(BONUS).sort(()=>R()-.5).slice(0,n).map(k=>({k,v:BONUS[k].v(tier,rar)}))}
+Object.assign(BONUS,{stun:{n:'Étourdir',u:' %',x:1},block:{n:'Blocage',u:' %',x:1},vsM:{n:'vs monstres',u:' %',x:1},vsH:{n:'vs humains',u:' %',x:1}});
+function rollBonus(tier,rar){const n=Math.min(3,rar);return Object.keys(BONUS).filter(k=>!BONUS[k].x).sort(()=>R()-.5).slice(0,n).map(k=>({k,v:BONUS[k].v(tier,rar)}))}
 const itemLight=it=>Math.round((3+it.tier*4+it.rar*5)*(1+.2*(it.stars||0)));
 function eff(it){const m=1+STAR_K*(it.stars||0);
   const o={atk:r1(it.atk*m),def:r1(it.def*m),hp:Math.round(it.hp*m),crit:it.crit,ls:it.ls,block:it.block,stun:it.stun,vsH:it.vsH,vsM:it.vsM,cdmg:0,dbl:0,atkp:0,light:itemLight(it)};
@@ -398,10 +450,11 @@ const starsTxt=n=>'★'.repeat(n||0)+'☆'.repeat(MAXSTAR-(n||0));
 const starsHtml=n=>`<div class="stars">${'★'.repeat(n||0)}<span class="off">${'★'.repeat(MAXSTAR-(n||0))}</span></div>`;
 function itemCard(it,actions='',eq=false){
   const dp=it.dur/it.durMax;
-  return `<div class="item ${eq?'eq':''}"><div class="art" style="--rb:${RBG[it.rar]}"><img alt="" src="${itemIcon(it.type,it.tier,it.rar)}">${starsHtml(it.stars)}</div><div class="body">
+  return `<div class="item ${eq?'eq':''}"><div class="art" style="--rb:${RBG[it.rar]}"><img alt="" src="${iconOf(it)}">${starsHtml(it.stars)}</div><div class="body">
     <div class="n rar${it.rar}">${esc(it.name)}${it.stars?`<span class="st">${'★'.repeat(it.stars)}</span>`:''}</div>
     <div class="m">${TYPES[it.type].n} rang ${roman(it.lvl)} · <span class="pill rar${it.rar}">${RAR[it.rar]}</span> · Qualité ${it.q} (${QLBL(it.q)})</div>
     ${itemStatsHtml(it)}
+    ${it.desc?`<div class="m"><i>${esc(it.desc)}</i></div>`:''}
     ${it.fl?`<div class="m">Affiné par le forgeron : <b>+${it.fl} %</b></div>`:''}
     ${it.parts.length?`<div class="m">Pièces : ${it.parts.map(p=>`<b class="rar${p.r}">${PARTS[p.k].n}</b>`).join(', ')}</div>`:''}
     <div class="m" style="display:flex;gap:8px;align-items:center"><span style="white-space:nowrap">${it.dur<=0?'<b style="color:var(--red)">Brisé</b>':'Usure '+Math.round(it.dur)+'/'+it.durMax}</span><div class="dur" style="flex:1"><i style="width:${dp*100}%;background:${dp>.5?'#5aaa32':dp>.2?'#e8a52a':'#e0533a'}"></i></div></div>
@@ -865,9 +918,9 @@ const goldIcon=()=>icon('gold',()=>{for(let i=0;i<3;i++){E(-8+i*8,16-i*12,18,7,'
 function heroArt(forge=false){
   const e=sl=>{const it=itemById(S.equip[sl]);return it&&it.dur>0?it:null};
   const w=e('arme'),h=e('casque'),b=e('armure'),s=e('bouclier');
-  const arm=b&&!forge?{mail:mix(STEEL,oreC(b.tier),.35),plate:b.tier>=3?mix(STEEL,oreC(b.tier),.65):null}:null;
-  return{t:'hum',hero:1,skin:'#e8a77e',hair:'#7a4520',body:'#3f6fb0',helm:h&&!forge?{col:mix(STEEL,oreC(h.tier),.55),tier:h.tier}:null,armor:arm,
-    w:forge?'none':(w?TYPES[w.type].w:'none'),wc:w?oreC(w.tier):null,shield:(!forge&&s)?oreC(s.tier):null,st:s?s.tier:1,apron:forge};
+  const arm=b&&!forge?{mail:mix(STEEL,itemCol(b),.35),plate:b.tier>=3||b.relic?mix(STEEL,itemCol(b),.65):null}:null;
+  return{t:'hum',hero:1,skin:'#e8a77e',hair:'#7a4520',body:'#3f6fb0',helm:h&&!forge?{col:mix(STEEL,itemCol(h),.55),tier:h.relic?Math.max(3,h.tier):h.tier}:null,armor:arm,
+    w:forge?'none':(w?TYPES[w.type].w:'none'),wc:w?itemCol(w):null,shield:(!forge&&s)?itemCol(s):null,st:s?s.tier:1,apron:forge};
 }
 
 /* ================= icônes SVG d'interface ================= */
@@ -894,8 +947,8 @@ function chips(){
 /* ================= classement partagé entre joueurs ================= */
 /* Chaque joueur écrit sa propre ligne (classement/<son id>) ; tout le monde lit le classement. */
 const LB={db:null,user:null,me:null,rows:[],names:{},state:'loading',sort:'pr',sent:'',timer:0,canWrite:null,err:null};
-const LBS={pr:['Puissance',r=>r.pr],stars:['Étoiles',r=>r.stars],abyss:['Abysse',r=>r.abyss],mast:['Maîtrise',r=>r.mast]};
-function myScore(){const s=stats();return{pr:s.pr,stars:totalStars(),abyss:S.best[5]||0,mast:mastLvl(),rank:rankOf(s.pr)}}
+const LBS={pr:['Puissance',r=>r.pr],relics:['Reliques',r=>r.relics],stars:['Étoiles',r=>r.stars],abyss:['Abysse',r=>r.abyss],mast:['Maîtrise',r=>r.mast]};
+function myScore(){const s=stats();return{pr:s.pr,relics:Object.keys(S.relics).length,stars:totalStars(),abyss:S.best[5]||0,mast:mastLvl(),rank:rankOf(s.pr)}}
 (async()=>{
   if(!window.claude||!window.claude.use){LB.state='off';return}
   const to=setTimeout(()=>{if(LB.state==='loading'){LB.state='off';if(TAB==='rank')render()}},10000);
@@ -927,7 +980,7 @@ function vRank(){
     rows.sort((a,b)=>(f(b)||0)-(f(a)||0));
     board=`<div class="seg">${Object.entries(LBS).map(([k,[n]])=>`<button class="btn sm ${LB.sort===k?'gold':'wood'}" data-a="lbsort" data-v="${k}">${n}</button>`).join('')}</div>
       <div class="lb">${rows.slice(0,50).map((r,i)=>{const mine=r.id===LB.me,n=mine?'Toi':(LB.names[r.id]||'Forgeron anonyme'),v=f(r)||0;
-        return`<div class="lbrow ${mine?'me':''}"><span class="pos ${i<3?'p'+(i+1):''}">${i<3?['①','②','③'][i]:'#'+(i+1)}</span><span class="who">${esc(n)} <span class="small muted">· ${RANKS[r.rank||0][1]}</span></span><span class="val">${LB.sort==='stars'?v+' ★':LB.sort==='abyss'?'prof. '+v:LB.sort==='mast'?'niv. '+v:fmt(v)}</span></div>`}).join('')}</div>
+        return`<div class="lbrow ${mine?'me':''}"><span class="pos ${i<3?'p'+(i+1):''}">${i<3?['①','②','③'][i]:'#'+(i+1)}</span><span class="who">${esc(n)} <span class="small muted">· ${RANKS[r.rank||0][1]}</span></span><span class="val">${LB.sort==='relics'?v+' / '+RELICS.length:LB.sort==='stars'?v+' ★':LB.sort==='abyss'?'prof. '+v:LB.sort==='mast'?'niv. '+v:fmt(v)}</span></div>`}).join('')}</div>
       ${LB.canWrite===false?'<div class="hint small">Ton accès à cette page est en lecture seule : tu vois le classement mais ton score n\'y est pas enregistré. Demande l\'accès « Contributeur » au propriétaire pour y entrer.</div>':''}
       <div class="small muted">${LB.rows.length} forgeron${LB.rows.length>1?'s':''} classé${LB.rows.length>1?'s':''}. Ton score se met à jour tout seul quand tu progresses.</div>`;
   }
@@ -937,6 +990,9 @@ function vRank(){
       ${nx?`<div style="width:100%"><div class="small muted">Prochain titre : <b>${nx[1]}</b> à ${nx[0]} de puissance</div><div class="skbar big" style="--sc:#ffd24a"><i style="width:${clamp((s.pr-RANKS[ri0][0])/(nx[0]-RANKS[ri0][0]),0,1)*100}%"></i></div></div>`:'<div class="small ok">Titre maximum atteint !</div>'}
       <table class="st" style="width:100%"><tr><td>Étoiles portées</td><td>${s.stars} ★ (+${8*s.stars})</td></tr><tr><td>Lumière</td><td>${s.light} (+${s.light*2})</td></tr><tr><td>Maîtrise niveau ${ml}</td><td>+${15*ml} · stats +${ml} %</td></tr><tr><td>Équipement et compétences</td><td>le reste</td></tr></table>
       ${LB.state==='ok'&&LB.me?`<div class="small">Ta place : <b>#${myPlace('pr')||'–'}</b> en puissance · <b>#${myPlace('stars')||'–'}</b> en étoiles</div>`:''}</div>
+    <div class="frame stack"><h3>Reliques · ${Object.keys(S.relics).length} / ${RELICS.length}</h3>
+      <div class="small muted">Des armes et armures de légende, ultra-rares. Chaque échec rend la suivante un peu plus probable. En double, elles se changent en fragments d'étoile.</div>
+      <div class="relicgrid">${RELICS.map(x=>{const own=S.relics[x.id];return`<div class="relic ${own?'own':''}"><img alt="" src="${own?relicIcon(x.id):relicShadow(x.id)}"><span class="rn ${own?'rar6':''}">${own?x.n:'???'}</span><span class="muted">${relicSrc(x)}</span><span>${own?'<b class="ok">Obtenue</b>':`Chance : <b>${(relicChance(x)*100).toFixed(1)} %</b>`}</span></div>`}).join('')}</div></div>
     <div class="frame stack"><h3>Maîtrise · niveau ${ml}</h3>
       <div class="small muted">Chaque objet nouveau (type, minerai, rareté) entre dans ta collection. Plus il est rare, plus il rapporte. Chaque niveau donne +1 % d'ATQ et de PV, et +15 de puissance.</div>
       <div class="skbar big" style="--sc:#8a3fc8"><i style="width:${clamp((mp-Math.ceil(ml*ml/1.5))/Math.max(1,nm-Math.ceil(ml*ml/1.5)),0,1)*100}%"></i></div>
@@ -1171,7 +1227,7 @@ function drawForgeScene(g,W,H,t,dt){
   PL([470,40,560,40,560,130,515,112,470,130],'#c0392b');G.save();G.translate(515,92);G.scale(.6,.6);drawWeapon('smith','#9aa4ae');G.restore();
   RR(600,70,320,16,4,'#8a5a2b');RR(600,160,320,16,4,'#8a5a2b');
   const eqs=Object.values(S.equip).map(itemById).filter(Boolean);
-  [0,1,2,3].forEach(i=>{const x=640+i*78;E(x,84,5,5,'#5a3418',2);const it=eqs[i];if(it){G.save();G.translate(x,124);G.scale(.62,.62);drawItem(it.type,it.tier);G.restore()}});
+  [0,1,2,3].forEach(i=>{const x=640+i*78;E(x,84,5,5,'#5a3418',2);const it=eqs[i];if(it){G.save();G.translate(x,124);G.scale(.62,.62);drawItem(it.type,it.tier,it.col);G.restore()}});
   RR(-10,360,W+20,90,0,'#8a5a2b');for(let x=0;x<W;x+=96)LN(x,362,x,H,'#6b3f1f',3);LN(0,362,W,362,OL,4);
   const glow=g.createRadialGradient(150,280,10,150,280,320);glow.addColorStop(0,`rgba(255,150,40,${.25+heat*.35})`);glow.addColorStop(1,'rgba(255,120,30,0)');g.fillStyle=glow;g.fillRect(0,0,W,H);
   RR(110,40,80,140,6,'#7d6e62');RR(100,30,100,22,6,'#8f8074');
@@ -1254,7 +1310,7 @@ function drawForgeUI(g,W,H,t){
 /* ---------- Équipement ---------- */
 function vEquip(){
   const s=stats(),inRun=!!S.run,eqIds=Object.values(S.equip);
-  const slots=Object.entries(SLOTS).map(([k,n])=>{const it=itemById(S.equip[k]);return`<div class="slot">${it?`<img alt="" src="${itemIcon(it.type,it.tier,it.rar)}">`:''}<div style="min-width:0"><div class="k">${n}</div>${it?`<div class="rar${it.rar}" style="font-weight:900">${esc(it.name)}</div><div class="small muted">${it.dur<=0?'<b style="color:var(--red)">Brisé</b>':'Usure '+Math.round(it.dur)+'/'+it.durMax}</div>`:'<span class="muted">vide</span>'}</div></div>`}).join('');
+  const slots=Object.entries(SLOTS).map(([k,n])=>{const it=itemById(S.equip[k]);return`<div class="slot">${it?`<img alt="" src="${iconOf(it)}">`:''}<div style="min-width:0"><div class="k">${n}</div>${it?`<div class="rar${it.rar}" style="font-weight:900">${esc(it.name)}</div><div class="small muted">${it.dur<=0?'<b style="color:var(--red)">Brisé</b>':'Usure '+Math.round(it.dur)+'/'+it.durMax}</div>`:'<span class="muted">vide</span>'}</div></div>`}).join('');
   const items=[...S.items].sort((a,b)=>(eqIds.includes(b.id)-eqIds.includes(a.id))||a.slot.localeCompare(b.slot)||b.rar-a.rar);
   const list=items.map(it=>{const eq=eqIds.includes(it.id);
     const sc=starCost(it),can=(it.stars||0)<MAXSTAR,ok=can&&S.frag>=sc.frag&&S.gold>=sc.gold;
@@ -1318,6 +1374,7 @@ function vExp(){
     <div class="grid2"><div class="frame stack"><div class="cardrow"><canvas class="cardcv" data-card="boss" width="220" height="300"></canvas><div class="stack" style="flex:1;min-width:0"><h2>${z.n}</h2><div class="muted">${z.d}</div></div></div>
       <div class="small"><b>Minerais :</b> ${MAPSEL<5?`${oreN(MAPSEL+1)}, ${oreN(MAPSEL+2)}`:'tous les paliers'} · <b>Record :</b> profondeur ${S.best[MAPSEL]||0}</div>
       <div class="small"><b>Gardien :</b> ${ENEM[z.boss].n}</div>
+      <div class="small"><b>Reliques :</b> ${RELICS.filter(x=>x.z===MAPSEL).map(x=>S.relics[x.id]?`<b class="rar6">${x.n} ✔</b>`:`<b>???</b> <span class="muted">(${x.src==='boss'?'gardien':x.src==='abyss'?'coffres profonds':'coffres rares, élites'})</span>`).join(' · ')}</div>
       ${(()=>{const st=stats();return`<div class="small"><b>Puissance recommandée :</b> <span class="${st.pr>=z.pr?'ok':'warn'}">${z.pr}</span> (toi : ${st.pr})${z.light?` · <b>Lumière :</b> <span class="${st.light>=z.light?'ok':'warn'}">${z.light}${MAPSEL===5?'+':''}</span> (toi : ${st.light})`:''}</div>${z.light&&st.light<z.light?'<div class="small warn">Sans assez de Lumière, les ténèbres renforcent les ennemis et affaiblissent tes coups.</div>':''}`})()}
       ${lock?`<div class="small" style="color:var(--red)">Verrouillé : vaincs le gardien de « ${ZONES[MAPSEL-1].n} ».</div>`:`<div class="row"><button class="btn big" data-a="depart" data-v="${MAPSEL}" ${!S.equip.arme?'disabled':''}>Partir à l'aventure</button></div>${!S.equip.arme?'<div class="small" style="color:var(--red)">Forge-toi au moins une arme avant de partir.</div>':''}`}
     </div><div class="frame stack small"><h3>Règle du risque</h3>
@@ -1700,6 +1757,8 @@ function victory(e){
   const gold=Math.round(ri(3,8)*m*(e.boss?4:e.elite?2:1)*(1+.05*(SL('survie')-1)));skXp('escrime',8*(1+r.zone)*(e.boss?3:1));
   r.bag.gold+=gold;S.st.kills++;{const fq=e.boss?3+2*r.zone:e.elite?2+r.zone:(R()<.3?1+Math.floor(r.zone/2):0);if(fq){r.bag.list.push({t:'frag',q:fq});log('y',`+${fq} fragment${fq>1?'s':''} d'étoile.`);floatTxt(960-230,120,`+${fq} ✦`,'#ffd24a',1)}}const fx=r.fxp||{};log('g',`${e.n} est vaincu ! +${gold} or. XP : ${Object.entries(fx).map(([k,v])=>`${SK[k].n} +${v}`).join(', ')}.`);r.fxp={};floatTxt(230,140,`+${gold} or`,'#ffd24a',1);
   BUSY=false;
+  if(e.boss)tryRelic(RELICS.find(x=>x.src==='boss'&&x.key===e.key));
+  else if(e.elite){tryRelic(RELICS.find(x=>x.src==='zone'&&x.z===r.zone),.8);if(/champion$/.test(e.n))tryRelic(RELIC.chevnoir)}
   if(e.boss){
     if(r.zone+1===S.unlocked&&S.unlocked<6){S.unlocked++;log('y',`Nouvelle région ouverte : ${ZONES[S.unlocked-1].n} !`);toast(`Nouvelle région : ${ZONES[S.unlocked-1].n}`)}
     r.chest={r:rollRarity(r.zone,r.depth,Math.min(5,2+Math.floor(r.zone/2)))};r.ph='chest';A.enter=1;log('y','Le gardien protégeait un coffre.');
@@ -1715,6 +1774,7 @@ function victory(e){
 function openChest(){
   const r=S.run,c=r.chest;if(BUSY||CH)return;
   if(c.mimic){r.enemy=newEnemy('mimique',r.zone,r.depth,false);r.enemy.intent='lourd';r.ph='combat';A.shake=1;log('b','Le coffre ouvre une gueule pleine de dents : une Mimique !');render();return}
+  if(c.r>=2)tryRelic(RELICS.find(x=>x.src==='zone'&&x.z===r.zone),1+.3*(c.r-2));if(r.zone===5&&r.depth>=15)tryRelic(RELIC.egide);
   BUSY=true;render();startChestScene(c.r,chestLoot(r.zone,r.depth,c.r));
 }
 /* ---------- scène d'ouverture de coffre ---------- */
@@ -1818,8 +1878,8 @@ function defeat(){
   const bl=r.bag.list.length,bg=r.bag.gold;S.st.deaths++;S.best[r.zone]=Math.max(S.best[r.zone]||0,r.depth-1);S.run=null;BUSY=false;A.heroDie=0;
   openModal(`<h2 style="color:var(--red)">Tu es tombé</h2><p>${r.enemy?r.enemy.n:'Le chemin'} t'a vaincu à la profondeur ${r.depth}. Des voyageurs te ramènent au village.</p>
   <div class="small"><b>Butin perdu :</b> ${bl} objets et ${bg} or.</div>
-  ${lost.length?`<div class="lbl" style="color:var(--red)">Équipement perdu</div><div class="lootl">${lost.map(i=>`<div><img class="ic" alt="" src="${itemIcon(i.type,i.tier,i.rar)}"> <b class="rar${i.rar}">${esc(i.name)}</b></div>`).join('')}</div>`:''}
-  ${dmg.length?`<div class="lbl">Équipement abîmé</div><div class="lootl">${dmg.map(i=>`<div><img class="ic" alt="" src="${itemIcon(i.type,i.tier,i.rar)}"> <b class="rar${i.rar}">${esc(i.name)}</b> <span class="muted small">${i.dur<=0?'brisé':'usure '+i.dur+'/'+i.durMax}</span></div>`).join('')}</div>`:''}
+  ${lost.length?`<div class="lbl" style="color:var(--red)">Équipement perdu</div><div class="lootl">${lost.map(i=>`<div><img class="ic" alt="" src="${iconOf(i)}"> <b class="rar${i.rar}">${esc(i.name)}</b></div>`).join('')}</div>`:''}
+  ${dmg.length?`<div class="lbl">Équipement abîmé</div><div class="lootl">${dmg.map(i=>`<div><img class="ic" alt="" src="${iconOf(i)}"> <b class="rar${i.rar}">${esc(i.name)}</b> <span class="muted small">${i.dur<=0?'brisé':'usure '+i.dur+'/'+i.durMax}</span></div>`).join('')}</div>`:''}
   <div class="row"><button class="btn big" data-a="close">Se relever</button></div>`);
   TAB='exp';render();
 }
@@ -1830,6 +1890,7 @@ let last=performance.now();
 function loop(now){
   const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;const t=now/1000;
   try{
+    if(RELQ.length&&!CH&&$('#modal').hidden&&!A.walking)showRelic(RELQ.shift());
     mgUpdate(dt);let c;
     if((c=document.getElementById('forgeCv'))){const[g,W,H]=prep(c);drawForgeScene(g,W,H,t,dt)}
     if((c=document.getElementById('sceneCv'))){const[g,W,H]=prep(c);drawScene(g,W,H,t,dt)}
