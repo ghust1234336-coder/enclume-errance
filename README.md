@@ -6,13 +6,13 @@ Version jouable publiée : https://claude.ai/artifact/FPFvKMRytmkJZCXEW8nueq
 
 ## Lancer le jeu
 
-Tout tient dans un seul fichier, `index.html`, sans dépendance ni compilation. Ouvre-le dans un navigateur. La seule ressource externe est la police Google Fonts (Lilita One, Nunito) ; sans réseau, le jeu marche avec les polices de secours.
+Tout tient dans un seul fichier, `index.html`, sans compilation. Ouvre-le dans un navigateur. Ressources externes : la police Google Fonts (Lilita One, Nunito) et Three.js r128 depuis cdnjs pour le monde en 3D. Sans réseau, le jeu bascule sur le rendu 2D du village et des îles, avec les polices de secours.
 
 La progression est sauvegardée dans le `localStorage` du navigateur (clé `enclume-errance-v1`).
 
 ## Tests
 
-Les tests pilotent le jeu avec Playwright (Chromium) et enregistrent des captures dans `tests/captures/` (ignoré par git).
+Les tests pilotent le jeu avec Playwright (Chromium). Ils servent Three.js depuis `node_modules` (faire `npm install` une fois) à la place du CDN et enregistrent des captures dans `tests/captures/` (ignoré par git).
 
 ```bash
 mkdir -p tests/captures
@@ -42,7 +42,8 @@ Style cartoon à plat : fond lavande uni, couleurs unies, une seule bande d'ombr
 
 | Système | Résumé |
 |---|---|
-| Village (lobby) | Vue de dessus explorable (ZQSD/WASD/flèches ou toucher le sol, E pour interagir). Bâtiments : Forge, Marché, Atelier des étoiles (sac et étoiles), Maître d'armes (compétences), Tableau d'honneur (classement), Navire d'expédition. Les autres joueurs qui ont la page ouverte y apparaissent en direct avec leur équipement, leur nom et leur Puissance (capacité `room`). |
+| Rendu 3D | Village et îles en 3D (Three.js) : matériaux « toon » à 3 tons, contours épais en coque inversée, ombres portées, personnages chibi en volumes simples dont l'équipement (arme, bouclier, casque, armure) change selon le palier, ennemis modélisés par type (humanoïdes, bêtes, araignées, vases, dragons, mimiques). Combats mis en scène sur place : charge, entaille, éclats, ondes de choc, chiffres de dégâts, arène dégagée. Repli 2D si Three.js n'est pas disponible. |
+| Village (lobby) | Monde explorable (ZQSD/WASD/flèches ou toucher le sol, E pour interagir). Bâtiments : Forge, Marché, Atelier des étoiles (sac et étoiles), Maître d'armes (compétences), Tableau d'honneur (classement), Navire d'expédition. Les autres joueurs qui ont la page ouverte y apparaissent en direct avec leur équipement, leur nom et leur Puissance (capacité `room`). |
 | Îles | Chaque expédition est une île fermée générée (désert, forêt, cryptes, marais, volcan, Abysse) : ennemis qui rôdent et poursuivent, coffres, filons, autels, aventuriers tombés, grottes, campements, ruines, tanières, sanctuaires. Le danger (niveau des ennemis et du butin) monte en s'éloignant du navire ; le gardien est au bout de l'île ; on rentre en revenant au navire. Dans l'Abysse, un portail mène à la couche suivante. Mini-carte, ténèbres sans Lumière. |
 | Forge | Schéma (réutilisable, rang infini) + minerai (8 paliers) + moule et pièces optionnels. Cinq gestes notés, en gros plan : fonte (taper le soufflet, le minerai fond dans le creuset, attention à la surchauffe), coulée (remplir chaque cavité du moule — lame, garde, poignée… — jusqu'à sa ligne), martelage (frapper les cibles posées sur la pièce chaude avant qu'elle refroidisse ; la pièce s'aplatit coup après coup), trempe (couleur visée), affûtage ou polissage (la pièce glisse sur la meule, aiguiser chaque section au trait sans la brûler). Puis assemblage animé. La qualité 0–100 fixe les stats. |
 | Objets | Arme (épée, dague, hache, masse, lance, marteau), casque, cuirasse, bouclier. Rareté de Commun à Mythique, usure, réparation, démontage. |

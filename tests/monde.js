@@ -2,7 +2,7 @@
 const {chromium}=require('playwright');const SP=require('path').join(__dirname,'captures');
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1100,height:1000}});
 const errs=[];p.on('pageerror',e=>errs.push(e.message));p.on('console',m=>{if(m.type()==='error')errs.push(m.text())});
-await p.goto('file://'+require('path').join(__dirname,'..','index.html'));await p.waitForTimeout(900);
+await require('./three-local')(p);await p.goto('file://'+require('path').join(__dirname,'..','index.html'));await p.waitForTimeout(900);
 await p.screenshot({path:SP+'/w1.png'});
 // marcher vers la forge au clavier
 await p.keyboard.down('ArrowLeft');await p.keyboard.down('ArrowUp');await p.waitForTimeout(1600);await p.keyboard.up('ArrowLeft');await p.keyboard.up('ArrowUp');

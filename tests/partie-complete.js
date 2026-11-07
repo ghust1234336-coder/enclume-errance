@@ -1,7 +1,7 @@
 const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1100,height:1000}});
 const errs=[];p.on('pageerror',e=>errs.push(e.message));p.on('console',m=>{if(m.type()==='error')errs.push(m.text())});
-await p.goto('file://'+require('path').join(__dirname,'..','index.html'));await p.waitForTimeout(800);
+await require('./three-local')(p);await p.goto('file://'+require('path').join(__dirname,'..','index.html'));await p.waitForTimeout(800);
 await p.screenshot({path:require('path').join(__dirname,'captures','f0.png')});
 await p.evaluate(()=>{TAB='forge';render()});await p.waitForTimeout(300);
 await p.click('[data-a=fbp][data-v=epee]');await p.click('[data-a=fore][data-v="1"]');await p.click('[data-a=fpart]');

@@ -1,0 +1,8 @@
+{
+  "name": "enclume-errance",
+  "private": true,
+  "description": "Tests du jeu Enclume & Errance (le jeu lui-même tient dans index.html).",
+  "devDependencies": {
+    "three": "0.128.0"
+  }
+}

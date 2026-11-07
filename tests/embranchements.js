@@ -3,7 +3,7 @@ const {chromium}=require('playwright');const path=require('path');
 const cap=n=>path.join(__dirname,'captures',n);
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1100,height:1100}});
 const errs=[];p.on('pageerror',e=>errs.push(e.message));p.on('console',m=>{if(m.type()==='error')errs.push(m.text())});
-await p.goto('file://'+path.join(__dirname,'..','index.html'));await p.waitForTimeout(600);
+await require('./three-local')(p);await p.goto('file://'+path.join(__dirname,'..','index.html'));await p.waitForTimeout(600);
 // héros équipé d'une bonne épée, sans passer par la forge
 await p.evaluate(()=>{const it=makeItem('epee',3,2,90,null,[]);it.atk*=4;S.items.push(it);S.equip.arme=it.id;S.potions=9;TAB='exp';render()});
 const KEYS=['route','grotte','pont','camp','ruines','taniere','raccourci','sanctuaire'];
