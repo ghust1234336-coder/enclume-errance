@@ -2038,12 +2038,12 @@ function vVillage(){
 /* ---------- les îles ---------- */
 const ISLE={key:'',m:null};
 const IPAL=[
- {land:['#e8c27a','#e0b86e'],sea:'#4a9fd8',cliff:'#c0904e',ob:'cactus',deco:'#d0a45e'},
- {land:['#5fae3e','#56a438'],sea:'#3d8ac0',cliff:'#3a6a2a',ob:'tree',deco:'#4a8a2e'},
- {land:['#6e6a80','#666276'],sea:'#2a2348',cliff:'#46425a',ob:'tomb',deco:'#5a566e'},
- {land:['#6a7a3e','#627238'],sea:'#3e5a3a',cliff:'#4a5a2a',ob:'reed',deco:'#56662e',pool:'#4e6a4a'},
- {land:['#5e3c30','#56362a'],sea:'#ff7a2a',cliff:'#3e221c',ob:'rock',deco:'#4e2c22',pool:'#ff8a2a'},
- {land:['#3c2c56','#36284e'],sea:'#0a0618',cliff:'#221636',ob:'crystal',deco:'#2c203e'}];
+ {land:['#e8c27a','#e0b86e'],sea:'#4a9fd8',cliff:'#c0904e',ob:'cactus',deco:'#d0a45e',stone:['#b09878','#a68e6e'],arena:['#8a6a5a','#7e5e50']},
+ {land:['#5fae3e','#56a438'],sea:'#3d8ac0',cliff:'#3a6a2a',ob:'tree',deco:'#4a8a2e',stone:['#8e8a84','#84807a'],arena:['#6e6a70','#646066']},
+ {land:['#6e6a80','#666276'],sea:'#2a2348',cliff:'#46425a',ob:'tomb',deco:'#5a566e',stone:['#8a8696','#807c8c'],arena:['#4a3e5a','#42364e']},
+ {land:['#6a7a3e','#627238'],sea:'#3e5a3a',cliff:'#4a5a2a',ob:'reed',deco:'#56662e',pool:'#4e6a4a',stone:['#7a7a66','#70705c'],arena:['#5a5040','#504638']},
+ {land:['#5e3c30','#56362a'],sea:'#ff7a2a',cliff:'#3e221c',ob:'rock',deco:'#4e2c22',pool:'#ff8a2a',stone:['#4a3a36','#42322e'],arena:['#2e1a18','#281614']},
+ {land:['#3c2c56','#36284e'],sea:'#0a0618',cliff:'#221636',ob:'crystal',deco:'#2c203e',stone:['#4e4066','#46385c'],arena:['#24183a','#1e1432']}];
 function genIsland(zone,seed,layer){
   const W=60,H=42,rand=rng(seed),cw=9,ch=7,N1=[],N2=[];for(let i=0;i<(cw+1)*(ch+1);i++){N1.push(rand());N2.push(rand())}
   const noise=(A,x,y)=>{const fx=x/W*cw,fy=y/H*ch,ix=Math.floor(fx),iy=Math.floor(fy),tx=fx-ix,ty=fy-iy,v=(i,j)=>A[Math.min(ch,j)*(cw+1)+Math.min(cw,i)];return lerp(lerp(v(ix,iy),v(ix+1,iy),tx),lerp(v(ix,iy+1),v(ix+1,iy+1),tx),ty)};
@@ -2051,40 +2051,78 @@ function genIsland(zone,seed,layer){
   for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){const d=Math.hypot((x-W/2)/(W*.47),(y-H/2)/(H*.45));if(d+(noise(N1,x,y)-.5)*.6<.86)t[y*W+x]=1}
   if(zone===3||zone===4)for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(t[y*W+x]===1&&noise(N2,x,y)>(zone===3?.72:.76))t[y*W+x]=2;
   let sx=Math.floor(W/2),sy=H-3;while(sy>2&&t[sy*W+sx]!==1)sy--;for(let y=sy-2;y<=sy;y++)for(let x=sx-2;x<=sx+2;x++)if(y>0)t[y*W+x]=1;
-  const P=IPAL[zone];
-  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(t[i]!==1)continue;walk[i]=true;if(Math.hypot(x-sx,y-sy)<5)continue;if(rand()<[.05,.15,.08,.07,.07,.07][zone]){ob[i]=rand()<.25?'rock':P.ob;walk[i]=false}}
-  const dist=new Int32Array(W*H).fill(-1),q=[sy*W+sx];dist[q[0]]=0;
-  for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c-x)/W;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const n=(y+dy)*W+x+dx;if(dist[n]<0&&walk[n]){dist[n]=dist[c]+1;q.push(n)}}}
+  /* t : 0 mer · 1 terre · 2 mare/lave · 3 zone rocheuse · 4 arène du gardien */
+  const P=IPAL[zone],L=i=>t[i]===1||t[i]===3||t[i]===4,N4=[[1,0],[-1,0],[0,1],[0,-1]];
+  const bfs=pass=>{const d=new Int32Array(W*H).fill(-1),q=[sy*W+sx];d[q[0]]=0;for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c-x)/W;for(const[dx,dy]of N4){const n=(y+dy)*W+x+dx;if(d[n]<0&&pass(n)){d[n]=d[c]+1;q.push(n)}}}return[d,q]};
+  const XY=c=>[c%W,Math.floor(c/W)],dd=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+  // 1) arène du gardien : la case la plus éloignée du navire qui a la place pour un cercle de pierre
+  const[d0,q0]=bfs(L),max0=Math.max(...d0),AR=3;
+  const room=c=>{const[cx,cy]=XY(c);let n=0,tot=0;for(let y=cy-AR-1;y<=cy+AR+1;y++)for(let x=cx-AR-1;x<=cx+AR+1;x++){if(Math.hypot(x-cx,y-cy)>AR+1)continue;tot++;if(x>0&&y>0&&x<W&&y<H&&L(y*W+x))n++}return n/tot};
+  let arena=q0[q0.length-1];for(let k=q0.length-1;k>q0.length*.7;k--){if(room(q0[k])>.93){arena=q0[k];break}}
+  const[bx,by]=XY(arena);for(let y=by-AR;y<=by+AR;y++)for(let x=bx-AR;x<=bx+AR;x++){const i=y*W+x;if(Math.hypot(x-bx,y-by)<=AR+.4&&L(i))t[i]=4}
+  // 2) zones rocheuses : deux ou trois plaques de roche à mi-chemin, où se cachent filons et grottes
+  const rocks=[],mid=q0.filter(c=>d0[c]>max0*.22&&d0[c]<max0*.8&&dd(XY(c),[bx,by])>AR+6&&dd(XY(c),[sx,sy])>7);
+  for(let k=0;k<40&&rocks.length<3&&mid.length;k++){const c=mid[Math.floor(rand()*mid.length)],p=XY(c);if(rocks.some(r=>dd(r,p)<10))continue;rocks.push([p[0],p[1],2.8+rand()*1.6])}
+  for(const[rx,ry,rr]of rocks)for(let y=Math.floor(ry-rr-2);y<=ry+rr+2;y++)for(let x=Math.floor(rx-rr-2);x<=rx+rr+2;x++){const i=y*W+x;if(i<0||i>=W*H||t[i]!==1)continue;if(Math.hypot(x-rx,y-ry)+(noise(N2,x,y)-.5)*2.2<rr)t[i]=3}
+  // 3) obstacles : rochers serrés dans les zones rocheuses, décor du biome ailleurs, rien près du navire ni dans l'arène
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(!L(i))continue;walk[i]=true;if(Math.hypot(x-sx,y-sy)<5||t[i]===4)continue;
+    if(t[i]===3){if(rand()<.3){ob[i]='rock';walk[i]=false}}else if(rand()<[.05,.15,.08,.07,.07,.07][zone]){ob[i]=rand()<.2?'rock':P.ob;walk[i]=false}}
+  // 4) piliers à torches autour de l'arène, avec une seule entrée tournée vers le navire
+  const aDock=Math.atan2(sy-by,sx-bx);
+  for(let k=0;k<14;k++){const a=k/14*Math.PI*2,da=Math.abs(((a-aDock+Math.PI*3)%(Math.PI*2))-Math.PI);const x=Math.round(bx+Math.cos(a)*(AR+1.2)),y=Math.round(by+Math.sin(a)*(AR+1.2)),i=y*W+x;if(!L(i))continue;
+    if(da<.55){ob[i]=null;walk[i]=true;continue}ob[i]=k%2?'pillar':'pillar';walk[i]=false}
+  for(let s2=AR;s2<AR+4;s2++){const x=Math.round(bx+Math.cos(aDock)*s2),y=Math.round(by+Math.sin(aDock)*s2);for(const[ox,oy]of[[0,0],[1,0],[0,1],[-1,0],[0,-1]]){const i=(y+oy)*W+x+ox;if(L(i)&&ob[i]!=='pillar'){ob[i]=null;walk[i]=true}}}
+  // 5) distances finales
+  let[dist,q]=bfs(i=>walk[i]);
+  if(dist[arena]<0){// passage creusé : on dégage les obstacles sur le plus court chemin par la terre jusqu'à l'arène
+    let c=arena,guardN=0;while(d0[c]>0&&guardN++<4000){if(ob[c]!=='pillar'){ob[c]=null;walk[c]=true}let nx=c;for(const[dx,dy]of N4){const n=c+dy*W+dx;if(d0[n]>=0&&d0[n]<d0[nx])nx=n}if(nx===c)break;c=nx}
+    [dist,q]=bfs(i=>walk[i])}
+  if(dist[arena]<0){for(let i=0;i<W*H;i++)if(ob[i]==='pillar'){ob[i]=null;walk[i]=L(i)}[dist,q]=bfs(i=>walk[i])}
   for(let i=0;i<W*H;i++)if(dist[i]<0)walk[i]=false;
-  const maxD=Math.max(...dist);const far=q[q.length-1],bx=far%W,by=Math.floor(far/W);
-  for(let y=by-2;y<=by+2;y++)for(let x=bx-2;x<=bx+2;x++){const i=y*W+x;if(t[i]===1&&dist[i]>=0){ob[i]=null;walk[i]=true}}
-  const base=zone===5?layer*8:0,depthAt=i=>base+1+Math.min(7,Math.floor(dist[i]/maxD*8));
-  const cand=q.filter(i=>dist[i]>6&&Math.hypot(i%W-bx,Math.floor(i/W)-by)>4);for(let i=cand.length-1;i>0;i--){const j=Math.floor(rand()*(i+1));[cand[i],cand[j]]=[cand[j],cand[i]]}
-  const used=[],ents=[];let nid=0;
-  const take=(sp)=>{for(let k=0;k<cand.length;k++){const c=cand[k];if(c<0)continue;const x=c%W,y=Math.floor(c/W);if(used.some(([ux,uy])=>Math.hypot(ux-x,uy-y)<sp))continue;cand[k]=-1;used.push([x,y]);return c}return null};
-  const add=(type,sp,o={})=>{const c=take(sp);if(c==null)return;const x=c%W,y=Math.floor(c/W);ents.push(Object.assign({id:type[0]+(nid++),type,x:(x+.5)*TS,y:(y+.75)*TS,hx:(x+.5)*TS,hy:(y+.75)*TS,depth:depthAt(c)},o))};
-  const foes=ZONES[zone].foes==='all'?FOES_ALL:ZONES[zone].foes;
-  for(let k=0;k<16+layer*2;k++)add('enemy',3,{key:foes[Math.floor(rand()*foes.length)],f:1});
-  for(let k=0;k<6;k++)add('chest',4,{mimic:rand()<.08,rs:rand()});
-  for(let k=0;k<5;k++)add('vein',4);
-  for(let k=0;k<2;k++)add('altar',6);for(let k=0;k<3;k++)add('bones',4);
-  const pk=['grotte','camp','ruines','taniere','sanctuaire'].sort(()=>rand()-.5).slice(0,3);for(const k of pk)add('poi',6,{k});
+  const maxD=Math.max(...dist);
+  const base=zone===5?layer*8:0,depthAt=i=>t[i]===4?base+8:base+1+Math.min(7,Math.floor(dist[i]/maxD*8));
+  // 6) placement réfléchi
+  const used=[],ents=[];let nid=0;const free=c=>c!=null&&walk[c]&&t[c]!==4&&dd(XY(c),[sx,sy])>6&&dd(XY(c),[bx,by])>AR+2.5;
+  const ok=(c,sp)=>free(c)&&!used.some(u=>dd(u,XY(c))<sp);
+  const put=(type,c,o={})=>{const[x,y]=XY(c);used.push([x,y]);const e=Object.assign({id:type[0]+(nid++),type,x:(x+.5)*TS,y:(y+.75)*TS,hx:(x+.5)*TS,hy:(y+.75)*TS,depth:depthAt(c)},o);ents.push(e);return e};
+  const pickIn=(list,sp)=>{const l=list.filter(c=>ok(c,sp));return l.length?l[Math.floor(rand()*l.length)]:null};
+  const reach=q.filter(c=>free(c));
+  const nbWalk=c=>N4.filter(([dx,dy])=>walk[c+dy*W+dx]).length,nbRock=c=>{let n=0;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]])if(ob[c+dy*W+dx]==='rock')n++;return n};
+  const foes=ZONES[zone].foes==='all'?FOES_ALL:ZONES[zone].foes,foe=()=>foes[Math.floor(rand()*foes.length)];
+  const guard=(c,k=1)=>{const[x,y]=XY(c);for(let n=0;n<k;n++){const near=reach.filter(o=>{const p=XY(o);const dv=Math.hypot(p[0]-x,p[1]-y);return dv>=1.5&&dv<=3&&ok(o,1.5)});if(near.length)put('enemy',near[Math.floor(rand()*near.length)],{key:foe(),f:1})}};
+  // filons : collés aux rochers des zones rocheuses (deux par zone)
+  for(const[rx,ry,rr]of rocks){const zoneT=reach.filter(c=>t[c]===3&&dd(XY(c),[rx,ry])<rr+1&&nbRock(c)>=2);for(let k=0;k<2;k++){const c=pickIn(zoneT,2.5);if(c!=null)put('vein',c)}}
+  // grotte creusée dans la plus grande zone rocheuse, avec un filon à l'intérieur
+  if(rocks.length){const R0=rocks.reduce((a,b)=>a[2]>b[2]?a:b);const c=pickIn(reach.filter(c=>dd(XY(c),[R0[0],R0[1]])<R0[2]+1.5&&nbRock(c)>=1),3);if(c!=null){put('poi',c,{k:'grotte'});const v=pickIn(reach.filter(o=>t[o]===3&&dd(XY(o),XY(c))<3.5),1.5);if(v!=null)put('vein',v)}}
+  // autres lieux : campement, ruines, tanière ou sanctuaire, loin les uns des autres
+  const others=['camp','ruines','taniere','sanctuaire'].sort(()=>rand()-.5).slice(0,3),poiC={};
+  for(const k of others){const c=pickIn(reach.filter(c=>t[c]===1&&dist[c]>maxD*.2),7);if(c!=null){put('poi',c,{k});poiC[k]=c}}
+  // coffres : jamais au hasard. Près des ruines et campements, au fond des culs-de-sac, au bord des falaises. La plupart sont gardés.
+  const chestAt=(c,rb,why)=>{if(c==null)return;const e=put('chest',c,{mimic:rand()<.07,rb,why});if(rand()<.75)guard(c,rb>=1?2:1)};
+  for(const k of['ruines','camp','sanctuaire'])if(poiC[k]!=null){const p=XY(poiC[k]);chestAt(pickIn(reach.filter(c=>dd(XY(c),p)<=2.5),1.5),1,'lieu')}
+  const deadEnds=reach.filter(c=>nbWalk(c)===1&&dist[c]>maxD*.3);for(let k=0;k<2;k++)chestAt(pickIn(deadEnds,6),1,'cachette');
+  const coast=reach.filter(c=>N4.some(([dx,dy])=>!L(c+dy*W+dx)&&t[c+dy*W+dx]!==2)&&dist[c]>maxD*.35);for(let k=0;k<2;k++)chestAt(pickIn(coast,8),0,'falaise');
+  // patrouilles : petits groupes de 2 ou 3 ennemis répartis sur l'île
+  for(let k=0;k<5+layer;k++){const c=pickIn(reach.filter(c=>t[c]!==3),6);if(c==null)break;put('enemy',c,{key:foe(),f:1});guard(c,1+(rand()<.5?1:0))}
+  // autels sur les hauteurs, aventuriers tombés près des dangers
+  for(let k=0;k<2;k++){const c=pickIn(reach.filter(c=>t[c]===1),8);if(c!=null)put('altar',c)}
+  for(let k=0;k<3;k++){const c=pickIn(reach.filter(c=>dist[c]>maxD*.4),5);if(c!=null)put('bones',c)}
   ents.push({id:'boss',type:'enemy',boss:1,key:zone===5?[...BOSSES,'horreur'][Math.floor(rand()*6)]:ZONES[zone].boss,x:(bx+.5)*TS,y:(by+.75)*TS,hx:(bx+.5)*TS,hy:(by+.75)*TS,depth:base+8,f:-1});
   ents.push({id:'dock',type:'dock',x:(sx+.5)*TS,y:(sy+1.2)*TS,depth:1});
   if(zone===5)ents.push({id:'portal',type:'portal',x:(bx+.5)*TS,y:(by-1.2)*TS,depth:base+8});
-  return{W,H,t,ob,walk,dist,maxD,start:[(sx+.5)*TS,(sy+.2)*TS],boss:[bx,by],ents,zone,layer,depthAt}}
+  return{W,H,t,ob,walk,dist,maxD,start:[(sx+.5)*TS,(sy+.2)*TS],boss:[bx,by],arena:[bx,by,AR],rocks,ents,zone,layer,depthAt}}
 function isle(){const r=S.run;if(!r||!r.isl)return null;const k=r.zone+':'+r.isl.seed+':'+r.isl.layer;if(ISLE.key!==k){ISLE.key=k;ISLE.m=genIsland(r.zone,r.isl.seed,r.isl.layer);ISLE.ground=null;ISLE.mini=null;
-  for(const e of ISLE.m.ents){if(e.type==='chest')e.r=rollRarity(r.zone,e.depth);if(e.type==='vein')e.tier=oreTierFor(r.zone,e.depth,0)}}return ISLE.m}
+  for(const e of ISLE.m.ents){if(e.type==='chest')e.r=Math.min(5,rollRarity(r.zone,e.depth)+(e.rb||0));if(e.type==='vein')e.tier=oreTierFor(r.zone,e.depth,0)}}return ISLE.m}
 function isleGround(m){const P=IPAL[m.zone],c=document.createElement('canvas');c.width=m.W*TS;c.height=m.H*TS;const g=c.getContext('2d'),W=m.W,old=G;G=g;
   g.fillStyle=P.sea;g.fillRect(0,0,c.width,c.height);
   if(m.zone===5)for(let i=0;i<260;i++){g.fillStyle=`rgba(255,255,255,${.2+hsh(i,4)*.6})`;g.fillRect(hsh(i)*c.width,hsh(i,2)*c.height,2,2)}
   else for(let i=0;i<220;i++){g.fillStyle=m.zone===4?'#ffd24a66':'#ffffff44';g.fillRect(hsh(i)*c.width,hsh(i,2)*c.height,14,3)}
-  const land=i=>m.t[i]===1;
+  const land=i=>m.t[i]===1||m.t[i]===3||m.t[i]===4;
   for(let y=0;y<m.H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(!land(i))continue;const px=x*TS,py=y*TS;
     if(y+1<m.H&&!land(i+W)){g.fillStyle=P.cliff;g.fillRect(px,py+TS,TS,14);g.fillStyle=shade(P.cliff,-.25);g.fillRect(px,py+TS+10,TS,4)}}
   for(let y=0;y<m.H;y++)for(let x=0;x<W;x++){const i=y*W+x,px=x*TS,py=y*TS;
     if(m.t[i]===2){g.fillStyle=P.pool;g.fillRect(px,py,TS,TS);continue}
-    if(!land(i))continue;g.fillStyle=P.land[(x+y*3+Math.floor(hsh(x,y)*2))%2];g.fillRect(px,py,TS,TS);
+    if(!land(i))continue;const pal=m.t[i]===3?P.stone:m.t[i]===4?P.arena:P.land;g.fillStyle=pal[(x+y*3+Math.floor(hsh(x,y)*2))%2];g.fillRect(px,py,TS,TS);
     if(hsh(x*5,y*7)<.22){g.fillStyle=P.deco;g.fillRect(px+8+hsh(x,y)*18,py+10+hsh(y,x)*18,8,4);g.fillRect(px+14+hsh(x,y)*10,py+18,5,3)}}
   g.lineWidth=5;g.strokeStyle=shade(P.cliff,-.35);g.beginPath();
   for(let y=0;y<m.H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(!land(i))continue;const px=x*TS,py=y*TS;
@@ -2093,13 +2131,14 @@ function isleGround(m){const P=IPAL[m.zone],c=document.createElement('canvas');c
   const d=m.ents.find(e=>e.type==='dock');RR(d.x-30,d.y-20,60,90,4,'#a8743e',3);for(let k=1;k<6;k++)LN(d.x-28,d.y-20+k*15,d.x+28,d.y-20+k*15,'#7a4a22',2);
   G=old;return c}
 function isleMini(m){const c=document.createElement('canvas'),k=2;c.width=m.W*k;c.height=m.H*k;const g=c.getContext('2d'),P=IPAL[m.zone];g.fillStyle=P.sea;g.fillRect(0,0,c.width,c.height);
-  for(let i=0;i<m.W*m.H;i++){if(m.t[i]!==1)continue;g.fillStyle=m.walk[i]?P.land[0]:P.cliff;g.fillRect(i%m.W*k,Math.floor(i/m.W)*k,k,k)}return c}
+  for(let i=0;i<m.W*m.H;i++){const ty=m.t[i];if(ty!==1&&ty!==3&&ty!==4)continue;g.fillStyle=ty===4?'#c0392b':ty===3?P.stone[0]:m.walk[i]?P.land[0]:P.cliff;g.fillRect(i%m.W*k,Math.floor(i/m.W)*k,k,k)}return c}
 function drawObstacle(k,X,Y,t,z){
   if(k==='tree'){RR(X-6,Y-26,12,28,3,'#6b3f2a',3);E(X,Y-46,24,22,'#3f8a2e',3.5);E(X-9,Y-53,10,8,'#5aa83a',0)}
   else if(k==='cactus'){RR(X-8,Y-48,16,50,8,'#5aa83a',3);RR(X-22,Y-34,10,22,5,'#5aa83a',3);RR(X+12,Y-40,10,18,5,'#5aa83a',3);LN(X,Y-40,X,Y-10,'#3f8a2e',2)}
   else if(k==='tomb'){RR(X-14,Y-36,28,38,12,'#a39b88',3);LN(X,Y-28,X,Y-10,'#6e6a72',3);LN(X-7,Y-22,X+7,Y-22,'#6e6a72',3)}
   else if(k==='reed'){for(let i=0;i<4;i++)TUBE([X-12+i*8,Y,X-12+i*8+Math.sin(t+i)*3,Y-30-i%2*8],4,'#7a8a3a');E(X-4,Y-34,4,8,'#6a4a2a',2)}
   else if(k==='crystal'){G.save();G.shadowColor='#c47cff';G.shadowBlur=10;SHARD(X-8,Y,6,22,-.3,'#9a6aff');SHARD(X+6,Y,7,30,.2,'#c47cff');G.restore()}
+  else if(k==='pillar'){RR(X-10,Y-56,20,58,4,'#8a8478',3);RR(X-14,Y-62,28,10,3,'#a29c90',3);PL([X-7,Y-62,X,Y-80-Math.sin(t*12)*4,X+7,Y-62],'#ff8a2a',2)}
   else{PL([X-22,Y+2,X-16,Y-20,X+2,Y-28,X+20,Y-16,X+22,Y+2],z===4?'#3a1f1a':z===5?'#2c203e':'#8a8478',3)}}
 function drawEnt(e,t,m){
   const X=e.x,Y=e.y;
@@ -2197,7 +2236,7 @@ function w3Init(){
   if(W3.r||!W3.ok)return;
   const r=new THREE.WebGLRenderer({antialias:true});r.setPixelRatio(Math.min(2,window.devicePixelRatio||1));r.shadowMap.enabled=true;r.shadowMap.type=THREE.PCFSoftShadowMap;
   W3.r=r;W3.cv=r.domElement;W3.cv.className='w3cv';
-  const d=new Uint8Array([150,150,150,205,205,205,255,255,255]);W3.grad=new THREE.DataTexture(d,3,1,THREE.RGBFormat);W3.grad.minFilter=W3.grad.magFilter=THREE.NearestFilter;W3.grad.needsUpdate=true;
+  const d=new Uint8Array([130,130,130,195,195,195,255,255,255]);W3.grad=new THREE.DataTexture(d,3,1,THREE.RGBFormat);W3.grad.minFilter=W3.grad.magFilter=THREE.NearestFilter;W3.grad.needsUpdate=true;
   W3.cam=new THREE.PerspectiveCamera(42,16/9,.1,400);W3.camPos=new THREE.Vector3(17,12,24);W3.camLook=new THREE.Vector3(17,0,13);
   W3.cv.addEventListener('pointerdown',w3Pointer);
 }
@@ -2325,7 +2364,7 @@ function label3(id,html,x,y,z,cls=''){let el=W3.labels[id];if(!el){el=document.c
 function labelsGC(){for(const k in W3.labels){const el=W3.labels[k];if(el._seen!==W3.t){el.remove();if(el.classList.contains('dmg'))delete W3.labels[k]}}}
 /* ---------- scène commune ---------- */
 function newScene(sky,fog,hemi,sunCol,sunI){const s=new THREE.Scene();s.background=C3(sky);s.fog=new THREE.Fog(C3(fog),30,70);
-  s.add(new THREE.HemisphereLight(C3(hemi[0]),C3(hemi[1]),.85));const sun=new THREE.DirectionalLight(C3(sunCol),sunI);sun.position.set(8,18,10);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+  s.add(new THREE.HemisphereLight(C3(hemi[0]),C3(hemi[1]),.62));const sun=new THREE.DirectionalLight(C3(sunCol),sunI);sun.position.set(8,18,10);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
   const c=sun.shadow.camera;c.left=-18;c.right=18;c.top=18;c.bottom=-18;c.near=1;c.far=60;sun.shadow.bias=-.0008;s.add(sun,sun.target);s.userData.sun=sun;return s}
 function followSun(s,x,z){const sun=s.userData.sun;sun.position.set(x+8,18,z+10);sun.target.position.set(x,0,z)}
 function canvasTex(c){const t=new THREE.CanvasTexture(c);t.anisotropy=4;return t}
@@ -2383,10 +2422,10 @@ function buildIsle3(m){
   const z=m.zone,P=IPAL[z],sk=ISKY[z];const s=newScene(sk[0],sk[1],[shade(sk[0],.3),P.cliff],z===5?'#c8a8ff':z===4?'#ffb070':'#fff3d6',z===5?.55:.95);
   const sea=new THREE.Mesh(new THREE.PlaneGeometry(300,300),tmat(P.sea,{emissive:z===4?'#ff5a10':z===5?'#0a0618':P.sea,ei:z===4?.9:.25}));sea.rotation.x=-Math.PI/2;sea.position.set(m.W/2,-.75,m.H/2);s.add(sea);W3.water=sea;
   if(z===5){const g=new THREE.BufferGeometry(),a=[];for(let i=0;i<600;i++)a.push(m.W/2+(Math.random()-.5)*160,-2-Math.random()*30,m.H/2+(Math.random()-.5)*160);g.setAttribute('position',new THREE.Float32BufferAttribute(a,3));s.add(new THREE.Points(g,new THREE.PointsMaterial({color:0xe8d8ff,size:.25})))}
-  const top=[],top2=[],cliff=[],pool=[];
-  for(let y=0;y<m.H;y++)for(let x=0;x<m.W;x++){const i=y*m.W+x,t=m.t[i];if(t===1){((x+y)%2?top:top2).push([x+.5,-.15,y+.5]);cliff.push([x+.5,-.8,y+.5])}else if(t===2){pool.push([x+.5,-.45,y+.5]);cliff.push([x+.5,-1,y+.5])}}
+  const top=[],top2=[],cliff=[],pool=[],st1=[],st2=[],ar1=[],ar2=[];
+  for(let y=0;y<m.H;y++)for(let x=0;x<m.W;x++){const i=y*m.W+x,t=m.t[i];if(t===3){((x+y)%2?st1:st2).push([x+.5,-.12,y+.5]);cliff.push([x+.5,-.8,y+.5])}else if(t===4){((x+y)%2?ar1:ar2).push([x+.5,-.12,y+.5]);cliff.push([x+.5,-.8,y+.5])}else if(t===1){((x+y)%2?top:top2).push([x+.5,-.15,y+.5]);cliff.push([x+.5,-.8,y+.5])}else if(t===2){pool.push([x+.5,-.45,y+.5]);cliff.push([x+.5,-1,y+.5])}}
   const gt=BOX(1,.3,1),gc=BOX(1,1,1);
-  for(const[list,col]of[[top,P.land[0]],[top2,P.land[1]]]){const im=inst(gt,col,list,{outline:false,recv:true,cast:false});if(im)s.add(im)}
+  for(const[list,col]of[[top,P.land[0]],[top2,P.land[1]],[st1,P.stone[0]],[st2,P.stone[1]],[ar1,P.arena[0]],[ar2,P.arena[1]]]){const im=inst(gt,col,list,{outline:false,recv:true,cast:false});if(im)s.add(im)}
   {const im=inst(gc,P.cliff,cliff,{outline:false,recv:true,cast:false});if(im)s.add(im)}
   if(pool.length){const im=inst(BOX(1,.1,1),P.pool,pool,{outline:false,emissive:z===4?'#ff5a10':P.pool,ei:z===4?1:.2,cast:false});s.add(im)}
   // obstacles par type, instanciés (masqués pendant les combats pour dégager l'arène)
@@ -2399,6 +2438,10 @@ function buildIsle3(m){
   if(ob.reed){obs.add(inst(CYL(.04,.05,1.1,5),'#7a8a3a',lift(ob.reed,.55),{outline:false}));obs.add(inst(CYL(.08,.08,.3,6),'#6a4a2a',lift(ob.reed,1.05),{outline:false}))}
   if(ob.crystal){obs.add(inst(new THREE.OctahedronGeometry(.4,0),'#9a6aff',ob.crystal.map(p=>[p[0],.5,p[2],p[3],p[4],.7,1.6]),{emissive:'#7a3aff',ei:.5}))}
   if(ob.rock){obs.add(inst(new THREE.DodecahedronGeometry(.5,0),z===4?'#3a1f1a':z===5?'#2c203e':'#8a8478',lift(ob.rock,.3).map(p=>[p[0],p[1],p[2],p[3],p[4],1,.75])))}
+  if(ob.pillar){obs.add(inst(CYL(.28,.34,1.9,8),'#9a948a',lift(ob.pillar,.95)));obs.add(inst(BOX(.8,.22,.8),'#b8b2a6',lift(ob.pillar,1.95)));obs.add(inst(CONE(.2,.5,6),'#ff8a2a',lift(ob.pillar,2.3),{outline:false,emissive:'#ff6a1a',ei:1,cast:false}))}
+  if(m.arena){const[ax,ay,ar]=m.arena;const rune=new THREE.Mesh(new THREE.TorusGeometry(ar-.6,.09,6,48),new THREE.MeshBasicMaterial({color:0xff5a3a}));rune.rotation.x=-Math.PI/2;rune.position.set(ax+.5,.02,ay+.5);s.add(rune);
+    const rune2=new THREE.Mesh(new THREE.TorusGeometry(ar-1.4,.06,6,6),new THREE.MeshBasicMaterial({color:0xff8a5a}));rune2.rotation.x=-Math.PI/2;rune2.position.set(ax+.5,.02,ay+.5);s.add(rune2);s.userData.rune=rune2;
+    for(let k=0;k<3;k++){const a=k/3*Math.PI*2+.5,L2=new THREE.PointLight(0xff7a3a,.9,7);L2.position.set(ax+.5+Math.cos(a)*(ar+1),2.6,ay+.5+Math.sin(a)*(ar+1));s.add(L2)}}
   if(z===2||z===5){const L=new THREE.PointLight(z===5?0xc47cff:0x9a8aff,.6,30);L.position.set(m.W/2,8,m.H/2);s.add(L)}
   return s}
 function prop3(e){const g=new THREE.Group();
@@ -2495,7 +2538,7 @@ function w3Frame(t,dt){
     if(r.ph==='choice'){if(s.userData.obs)s.userData.obs.visible=true;for(const id in W3.ents)W3.ents[id].visible=true;if(W3.stage){if(W3.stage.tmp)s.remove(W3.stage.tmp);W3.stage=null;flash3(W3.chars.hero,false);W3.chars.hero.scale.setScalar(1);W3.chars.hero.rotation.z=0}
       const hc=W3.chars.hero;W3.camGoal=[hc.position.x,11.5,hc.position.z+8.6,hc.position.x,0,hc.position.z-.6];if(near){const o=W3.ents[near.id];if(o)label3('act','E · '+(INTV[near.type]||FORKS[near.k].n),o.position.x,near.type==='dock'?1.4:2.4,o.position.z,'act')}}
     else stage3(t,dt);
-    followSun(s,HUBI.x/TS,HUBI.y/TS);if(W3.water)W3.water.position.y=-.75+Math.sin(t*.8)*.04;
+    if(s.userData.rune)s.userData.rune.rotation.z=t*.4;followSun(s,HUBI.x/TS,HUBI.y/TS);if(W3.water)W3.water.position.y=-.75+Math.sin(t*.8)*.04;
     // effets de combat : décroissance des animations (le dessin 2D ne tourne plus)
     if(A.stop>0){A.stop-=dt;dt*=.05}
     const k=Math.pow(.0005,dt);A.hx*=k;A.ex*=k;A.fe-=dt;A.fh-=dt;A.shake*=Math.pow(.02,dt);A.heroAtk=Math.max(0,A.heroAtk-dt*2.4);A.enAtk=Math.max(0,A.enAtk-dt*2.4);if(A.heroDie>0)A.heroDie+=dt*2;
