@@ -35,7 +35,7 @@ Un Artifact attend la page sans `<!doctype>`, `<html>`, `<head>` ni `<body>` :
 
 ## Direction artistique
 
-Style cartoon à plat : fond lavande uni, couleurs unies, une seule bande d'ombre nette (bas-droite) et un liseré clair (haut-gauche) par forme, facette claire sur la moitié gauche des lames, contours épais teintés dans la couleur de l'objet, trame de points discrète. Le héros est un chevalier au gros heaume à chevrons et panache rouge ; arme, bouclier, casque et cuirasse prennent la couleur de leur minerai. Primitives : `SH`, `FACET`, `GRIP`, `knightHelm`, `knightShield`, `drawKnight`.
+Style cartoon à plat : fond lavande uni, couleurs unies, une seule bande d'ombre nette (bas-droite) et un liseré clair (haut-gauche) par forme, facette claire sur la moitié gauche des lames, contours épais teintés dans la couleur de l'objet, trame de points discrète. Le héros est un forgeron trapu (grosse tête carrée, mains rondes) qui commence sans armure. Ce qu'il équipe apparaît sur lui, dans la couleur du minerai et avec une forme qui évolue selon le palier : casque à nasal puis heaume à chevrons, cotte de mailles puis plastron, bouclier rond puis écu puis bouclier orné. Primitives : `SH`, `FACET`, `GRIP`, `heroHelm`, `knightShield`, `mailBody`, `drawHero`.
 
 ## Systèmes de jeu
 

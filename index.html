@@ -473,31 +473,58 @@ function knightShield(col,tier){
   else{PL([-30,-30,-12,-24,0,-34,12,-24,30,-30,26,4,12,22,0,34,-12,22,-26,4],col,3.5);PL([-16,-16,16,-16,14,8,0,22,-14,8],shade(col,-.32),2.5);
     for(let y=-12;y<14;y+=7)LN(-12,y,12,y+4,shade(col,-.5),1.5);E(0,-24,4,5,'#7af0ff',2)}
 }
-function drawKnight(a,p){
-  const t=p.t||0,bob=Math.sin(t*3.2+(p.ph||0))*1.4,ls=p.walking?Math.sin(t*12)*6:0;
-  SHADOW(0,0,46);
+/* casque du héros, selon le palier : nasal (1-2), heaume à chevrons (3-5), heaume à cornes (6+) */
+function heroHelm(col,tier){
+  if(tier<=2){
+    SH(()=>{G.moveTo(-38,-92);G.quadraticCurveTo(-38,-134,4,-134);G.quadraticCurveTo(46,-134,46,-92);G.closePath()},col,3.4,-38,-134,84,42);
+    RR(-40,-98,88,12,5,shade(col,-.12),3.2);RR(30,-98,9,26,3,shade(col,-.12),3);
+    for(const x of[-28,-10,8,26])E(x,-92,2.6,2.6,shade(col,.35),1.6);
+    return}
+  G.save();G.translate(0,-50);knightHelm(col,tier>=4?'#c0302c':null);G.restore();
+  if(tier>=6){PL([-30,-112,-50,-142,-40,-108],'#efe9d4',3);PL([26,-116,40,-148,40,-110],'#efe9d4',3)}
+}
+function mailBody(mail){
+  RR(-26,-68,52,50,11,mail,3.2);
+  G.save();G.beginPath();G.roundRect(-26,-68,52,50,11);G.clip();
+  for(let r=0;r<6;r++)for(let i=0;i<6;i++){const x=-24+i*10+(r%2)*5,y=-60+r*9;G.beginPath();G.arc(x,y,5,0,Math.PI);G.strokeStyle=shade(mail,-.42);G.lineWidth=2;G.stroke()}
+  G.restore();G.beginPath();G.roundRect(-26,-68,52,50,11);G.lineWidth=3.7;G.strokeStyle=shade(mail,-.62);G.stroke();
+}
+/* le forgeron : grosse tête carrée, petit corps trapu, mains rondes, formes simples */
+function drawHero(a,p){
+  const t=p.t||0,bob=Math.sin(t*3.2+(p.ph||0))*1.4,ls=p.walking?Math.sin(t*12)*6:0,skin=a.skin;
+  SHADOW(0,0,44);
   G.save();G.translate(0,bob*.4);
-  const leg='#2d2344',glove='#2d2344',mail=a.mail||'#4b5468';
-  RR(-20+ls*.7,-20,18,22,6,leg,3);RR(4-ls*.7,-20,18,22,6,leg,3);
-  // cotte de mailles : rangées d'écailles
-  RR(-28,-62,56,46,10,mail,3.2);
-  G.save();G.beginPath();G.roundRect(-28,-62,56,46,10);G.clip();
-  for(let r=0;r<5;r++)for(let i=0;i<6;i++){const x=-26+i*10+(r%2)*5,y=-54+r*9;G.beginPath();G.arc(x,y,5,0,Math.PI);G.strokeStyle=shade(mail,-.42);G.lineWidth=2;G.stroke()}
-  G.restore();G.beginPath();G.roundRect(-28,-62,56,46,10);G.lineWidth=3.6;G.strokeStyle=shade(mail,-.62);G.stroke();
-  if(a.plate){PL([-24,-62,24,-62,22,-38,0,-30,-22,-38],a.plate,3);LN(0,-60,0,-34,shade(a.plate,-.35),2.5)}
-  if(a.apron)PL([-20,-56,20,-56,22,-16,-22,-16],'#9a6230',3);
+  const leg='#3a2f52',boot='#2d2344';
+  RR(-19+ls*.7,-24,16,20,5,leg,3);RR(5-ls*.7,-24,16,20,5,leg,3);
+  RR(-22+ls*.7,-10,22,12,5,boot,3);RR(2-ls*.7,-10,22,12,5,boot,3);
+  // tunique (ou armure)
+  if(a.armor){mailBody(a.armor.mail);if(a.armor.plate){const pc=a.armor.plate;PL([-23,-68,23,-68,22,-42,0,-32,-22,-42],pc,3.2);LN(0,-64,0,-38,shade(pc,-.35),2.5);E(-24,-62,10,9,pc,3);E(24,-62,10,9,pc,3)}}
+  else{RR(-25,-68,50,48,12,a.body,3.2);PL([-6,-68,6,-68,0,-56],shade(a.body,-.25),2.2)}
+  RR(-27,-34,54,10,4,'#6b3f2a',3);RR(-7,-36,14,14,3,'#e8a52a',2.6);
+  if(a.apron)PL([-19,-58,19,-58,21,-14,-21,-14],'#c27838',3);
   // arme + main avant
-  const fa=(p.arm??-.35)+(p.swingFree?0:Math.sin(t*3.2)*.04),sx=40,sy=-58,hx=sx-Math.sin(fa)*20,hy=sy+Math.cos(fa)*20;
-  if(a.w&&a.w!=='none'){G.save();G.translate(hx,hy);G.rotate(p.wpn??.04);G.scale(1.75,1.75);drawWeapon(a.w,a.wc||STEEL);G.restore()}
-  G.save();G.translate(0,-50);knightHelm(a.hc||STEEL,a.plume);G.restore();
-  E(hx,hy,9,9,a.skin,3);
-  // bouclier tenu devant, main gantée
-  if(a.shield){G.save();G.translate(-26,-24);G.scale(.95,.95);knightShield(a.shield,a.st||1);G.restore()}
-  else E(-26,-36,8,8,glove,3);
+  const fa=(p.arm??-.35)+(p.swingFree?0:Math.sin(t*3.2)*.04),sx=38,sy=-58,hx=sx-Math.sin(fa)*20,hy=sy+Math.cos(fa)*20;
+  if(a.w&&a.w!=='none'){G.save();G.translate(hx,hy);G.rotate(p.wpn??.04);G.scale(1.6,1.6);drawWeapon(a.w,a.wc||STEEL);G.restore()}
+  // tête
+  if(!a.helm||a.helm.tier<=2){
+    E(-6,-92,8,10,shade(skin,-.06),3);
+    RR(-32,-126,72,64,20,skin,3.4);
+    if(!a.helm)PL([-36,-84,-38,-118,-26,-132,0,-136,30,-132,44,-118,42,-108,30,-114,32,-104,18,-112,12,-102,0,-112,-12,-106,-20,-112,-24,-84],a.hair,3.2);
+    const ec='#1e2333';RR(14,-106,8,15,4,ec,0);RR(28,-106,8,15,4,ec,0);E(17,-102,1.8,1.8,'#fff',0);E(31,-102,1.8,1.8,'#fff',0);
+    if(!a.helm){PL([11,-114,24,-112,24,-108,11,-109],shade(a.hair,-.2),0);PL([27,-112,38,-114,38,-109,27,-108],shade(a.hair,-.2),0)}
+    RR(36,-94,12,10,5,shade(skin,-.08),2.6);
+    G.beginPath();G.moveTo(22,-78);G.lineTo(32,-78);G.strokeStyle=shade(skin,-.6);G.lineWidth=3;G.lineCap='round';G.stroke();
+    E(10,-84,5,3,'rgba(224,83,58,.35)',0);
+  }
+  if(a.helm)heroHelm(a.helm.col,a.helm.tier);
+  E(hx,hy,9,9,skin,3);
+  // bouclier tenu devant, ou main libre
+  if(a.shield){G.save();G.translate(-26,-30);G.scale(.92,.92);knightShield(a.shield,a.st||1);G.restore()}
+  else E(-30,-40,9,9,skin,3);
   G.restore();
 }
 function drawHum(a,p){
-  if(a.knight)return drawKnight(a,p);
+  if(a.hero)return drawHero(a,p);
   const t=p.t||0,bob=Math.sin(t*3.2+(p.ph||0))*1.6,ls=p.walking?Math.sin(t*12)*7:0;
   SHADOW(0,0,38);
   G.save();G.translate(0,bob*.4);if(a.hunch)G.rotate(.12);
@@ -720,8 +747,8 @@ function silFill(type,col,lw=3){for(const f of silShapes(type)){G.beginPath();f(
 function drawItem(type,tier){
   const T=TYPES[type],c=oreC(tier),hi=shade(c,.5),dk=shade(c,-.3);
   if(T.slot==='arme'){const B={sword:[-63,22],dagger:[-38,17],axe:[-63,18],mace:[-70,16],spear:[-100,20],hammer:[-69,18]}[T.w]||[-63,20],len=B[1]-B[0],sc=Math.min(1.25,82/len);G.save();G.scale(sc,sc);G.translate(0,-(B[0]+B[1])/2);drawWeapon(T.w,c);G.restore()}
-  else if(T.slot==='casque'){G.save();G.scale(.85,.85);G.translate(-1,42);knightHelm(mix(STEEL,c,.55),'#c0302c');G.restore()}
-  else if(T.slot==='armure'){const m=mix(STEEL,c,.6);RR(-30,-30,60,58,12,'#4b5468',3.2);G.save();G.beginPath();G.roundRect(-30,-30,60,58,12);G.clip();for(let r=0;r<7;r++)for(let i=0;i<7;i++){G.beginPath();G.arc(-28+i*10+(r%2)*5,-24+r*9,5,0,Math.PI);G.strokeStyle='#2c3242';G.lineWidth=2;G.stroke()}G.restore();PL([-26,-32,26,-32,24,0,0,10,-24,0],m,3.2);LN(0,-28,0,6,shade(m,-.35),2.5);E(-30,-26,10,9,m,3);E(30,-26,10,9,m,3)}
+  else if(T.slot==='casque'){G.save();G.scale(.85,.85);G.translate(-4,98);heroHelm(mix(STEEL,c,.55),tier);G.restore()}
+  else if(T.slot==='armure'){G.save();G.scale(1.1,1.1);G.translate(0,43);mailBody(mix(STEEL,c,.35));if(tier>=3){const m=mix(STEEL,c,.65);PL([-23,-68,23,-68,22,-42,0,-32,-22,-42],m,3.2);LN(0,-64,0,-38,shade(m,-.35),2.5);E(-24,-62,10,9,m,3);E(24,-62,10,9,m,3)}G.restore()}
   else{G.save();G.scale(1.25,1.25);knightShield(c,tier);G.restore()}
 }
 const ICON={};
@@ -743,7 +770,8 @@ const goldIcon=()=>icon('gold',()=>{for(let i=0;i<3;i++){E(-8+i*8,16-i*12,18,7,'
 function heroArt(forge=false){
   const e=sl=>{const it=itemById(S.equip[sl]);return it&&it.dur>0?it:null};
   const w=e('arme'),h=e('casque'),b=e('armure'),s=e('bouclier');
-  return{t:'hum',knight:1,skin:'#d38d6c',hc:h?mix(STEEL,oreC(h.tier),.55):STEEL,plume:'#c0302c',mail:'#4b5468',plate:b&&!forge?mix(STEEL,oreC(b.tier),.6):null,
+  const arm=b&&!forge?{mail:mix(STEEL,oreC(b.tier),.35),plate:b.tier>=3?mix(STEEL,oreC(b.tier),.65):null}:null;
+  return{t:'hum',hero:1,skin:'#e8a77e',hair:'#7a4520',body:'#3f6fb0',helm:h&&!forge?{col:mix(STEEL,oreC(h.tier),.55),tier:h.tier}:null,armor:arm,
     w:forge?'none':(w?TYPES[w.type].w:'none'),wc:w?oreC(w.tier):null,shield:(!forge&&s)?oreC(s.tier):null,st:s?s.tier:1,apron:forge};
 }
 
@@ -1206,7 +1234,7 @@ function drawCard(g,W,H,t,art,title,col,badge,pose,locked){
   G.save();G.beginPath();G.roundRect(13,13,W-26,H-26,10);G.clip();
   g.fillStyle=mix(col,'#abaed1',.55);g.fillRect(0,0,W,H);E(W/2,H*.46,W*.42,W*.42,mix(col,'#ffffff',.55),0);
   const ty=art.t,p=Object.assign({t},pose);let s,tx,y;
-  if(ty==='hum'&&art.knight){s=1.35;tx=W/2;y=H-76}
+  if(ty==='hum'&&art.hero){s=1.35;tx=W/2;y=H-76}
   else if(ty==='hum'){s=art.big?2.05:2.25;tx=W/2-6*s;y=H*.44+104*s}
   else if(ty==='quad'){s=2.3;tx=W/2-30*s;y=H*.42+54*s}
   else if(ty==='spider'){s=2.1;tx=W/2;y=H*.5+38*s}
