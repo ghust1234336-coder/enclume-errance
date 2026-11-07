@@ -41,10 +41,10 @@ Style cartoon à plat : fond lavande uni, couleurs unies, une seule bande d'ombr
 
 | Système | Résumé |
 |---|---|
-| Forge | Schéma (réutilisable, rang infini) + minerai (8 paliers) + moule et pièces optionnels. Quatre gestes notés : fonte (soufflet), coulée (remplir le moule jusqu'à la ligne), martelage (cercles qui rétrécissent), trempe (couleur visée). La qualité 0–100 fixe les stats. |
+| Forge | Schéma (réutilisable, rang infini) + minerai (8 paliers) + moule et pièces optionnels. Cinq gestes notés, en gros plan : fonte (taper le soufflet, le minerai fond dans le creuset, attention à la surchauffe), coulée (remplir chaque cavité du moule — lame, garde, poignée… — jusqu'à sa ligne), martelage (frapper les cibles posées sur la pièce chaude avant qu'elle refroidisse ; la pièce s'aplatit coup après coup), trempe (couleur visée), affûtage ou polissage (la pièce glisse sur la meule, aiguiser chaque section au trait sans la brûler). Puis assemblage animé. La qualité 0–100 fixe les stats. |
 | Objets | Arme (épée, dague, hache, masse, lance, marteau), casque, cuirasse, bouclier. Rareté de Commun à Mythique, usure, réparation, démontage. |
-| Expéditions | 6 régions sur la carte du monde, la dernière sans fin. Sentier d'étapes (combat, coffre, filon, autel, piège, aventurier tombé), gardien toutes les 5 profondeurs. |
-| Embranchements | À la profondeur 3 de chaque tranche de 5 (et parfois au hasard), le chemin se divise en 3 voies : rester sur la route (sûr) et deux voies tirées parmi grotte (créature + filon riche), pont de corde, campement abandonné, ruines, tanière du champion (élite), raccourci (saute une profondeur), sanctuaire. Chaque voie affiche son niveau de risque. |
+| Expéditions | 6 régions sur la carte du monde, la dernière sans fin. Sentier d'étapes (combat, coffre, filon, autel, aventurier tombé), gardien toutes les 5 profondeurs. |
+| Embranchements | Rares : 40 % de chance à la profondeur 3 de chaque tranche de 5. Le chemin se divise en 2 voies (parfois 3) : rester sur la route (sûr) et une ou deux voies tirées parmi grotte (créature + filon riche), pont de corde, campement abandonné, ruines, tanière du champion (élite), raccourci (saute une profondeur), sanctuaire. Chaque voie affiche son niveau de risque. |
 | Combat | Tour par tour : frapper, coup lourd, parer, potion. L'ennemi annonce son intention. |
 | Coffres | Scène plein écran, coffres 2,5D par rareté, objets révélés un par un. 8 % de mimiques. |
 | Compétences | Forge, Escrime, Endurance, Survie. Chacune monte avec son activité et débloque des paliers. |
@@ -60,7 +60,7 @@ Le script est découpé en sections commentées, dans cet ordre :
 4. **Objets et butin** : `makeItem()`, `rollRarity()`, `lootEntry()`, `chestLoot()`, `bankLoot()`.
 5. **Dessin** : primitives à contour et ombrage (`SH`, `E`, `RR`, `PL`, `TUBE`, `TXT`), personnages (`drawHum`, `drawQuad`, `drawSpider`, `drawSlime`, `drawDragon`), coffres 2,5D (`drawChest3D`), icônes (`itemIcon`, `oreIcon`…), cartes de personnage (`drawCard`).
 6. **Vues** : `vForge`, `vEquip`, `vExp`, `vSkills`, `vMarket`, et `render()`.
-7. **Mini-jeu de forge** : `startForge`, `mgDown`/`mgUp`, `mgUpdate`, `drawForgeScene`.
+7. **Mini-jeu de forge** : `startForge`, `mgDown`/`mgUp`, `mgUpdate`, `pieceInfo` (cavités du moule), gros plans `drawPour`, `drawHammer`, `drawGrind`, `drawAssembly`, `drawForgeScene`.
 8. **Expédition** : décors (`paintBiome`), scène (`drawScene`), sentier (`drawTrail`), carte (`drawWorldMap`), logique (`step`, `resolveEvent`, embranchements `FORKS`/`genFork`/`chooseFork`, `cact`, `enemyAct`, `victory`, `goHome`, `defeat`).
 9. **Scène de coffre** : `startChestScene`, `chestUpdate`, `drawChestScene`.
 10. **Boucle d'animation** `loop()` et **actions** `ACT` (délégation des clics via `data-a`).

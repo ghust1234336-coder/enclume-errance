@@ -11,7 +11,7 @@ const out={};
 for(const k of KEYS){
   await p.evaluate(()=>{S.run=null;closeModal();depart(0)});await p.waitForTimeout(1600);
   // force un embranchement à la profondeur suivante, avec la voie testée
-  await p.evaluate(k=>{const r=S.run;r.ph='choice';r.enemy=null;r.depth=1;r.plan={2:'fork',3:'combat'};BUSY=false;walkThen(()=>{step();if(!S.run.fork.includes(k))S.run.fork[2]=k;render()})},k);
+  await p.evaluate(k=>{const r=S.run;r.ph='choice';r.enemy=null;r.depth=1;r.plan={2:'fork',3:'combat'};BUSY=false;walkThen(()=>{step();if(!S.run.fork.includes(k))S.run.fork[S.run.fork.length-1]=k;render()})},k);
   await p.waitForTimeout(1700);
   if(k==='route')await p.screenshot({path:cap('fork1.png')});
   const n=await p.$$eval('.fopt',x=>x.length);
