@@ -647,7 +647,8 @@ function drawChest(a,p){
 function drawProp(a,p){
   const t=p.t||0;
   if(a.t==='vein'){SHADOW(0,0,50);PL([-50,0,-42,-40,-20,-62,10,-58,36,-44,50,0],'#6e6a72');PL([-30,-30,-14,-48,6,-44],'#85818a',0);
-    [[-26,-20,1],[2,-34,1.3],[24,-16,1],[-6,-8,.8],[34,-34,.8]].forEach(([x,y,s])=>{G.save();G.translate(x,y);G.scale(s,s);PL([0,-16,9,-4,5,8,-5,8,-9,-4],a.col,2.5);PL([0,-16,9,-4,0,0],shade(a.col,.45),0);G.restore()})}
+    if(a.tier)[[-24,-22,.55],[6,-38,.7],[28,-18,.5]].forEach(([x,y,s])=>{G.save();G.translate(x,y);G.scale(s,s);drawOre(a.tier);G.restore()});
+    else [[-26,-20,1],[2,-34,1.3],[24,-16,1],[-6,-8,.8],[34,-34,.8]].forEach(([x,y,s])=>{G.save();G.translate(x,y);G.scale(s,s);PL([0,-16,9,-4,5,8,-5,8,-9,-4],a.col,2.5);PL([0,-16,9,-4,0,0],shade(a.col,.45),0);G.restore()})}
   else if(a.t==='altar'){SHADOW(0,0,40);RR(-34,-20,68,20,4,'#8a8478');RR(-22,-62,44,44,4,'#a29c90');RR(-30,-70,60,12,4,'#b8b2a6');
     const y=-104+Math.sin(t*2)*6;G.save();G.shadowColor=a.col;G.shadowBlur=25;PL([0,y-22,13,y,0,y+22,-13,y],a.col);G.restore();PL([0,y-22,13,y,0,y],'#ffffffaa',0)}
   else if(a.t==='trap'){SHADOW(0,0,50);RR(-52,-8,104,8,3,'#5a5048');for(let x=-46;x<48;x+=12)PL([x,-8,x+6,-36,x+12,-8],'#b8c0c8',2.5);}
@@ -756,7 +757,43 @@ function icon(key,fn){if(ICON[key])return ICON[key];const N=176,c=document.creat
   const o=document.createElement('canvas');o.width=o.height=N;const k=o.getContext('2d');k.drawImage(c,0,0);k.globalCompositeOperation='source-in';k.fillStyle='rgba(33,27,48,.32)';k.fillRect(0,0,N,N);
   const f=document.createElement('canvas');f.width=f.height=N;const h=f.getContext('2d');h.drawImage(o,6,8);h.drawImage(c,0,0);return ICON[key]=f.toDataURL()}
 const itemIcon=(type,tier,rar=0)=>icon(`i${type}${tier}${rar}`,()=>{if(rar>=2){G.save();G.shadowColor=RCOL[rar];G.shadowBlur=18;drawItem(type,tier);G.restore()}drawItem(type,tier)});
-const oreIcon=t=>icon('o'+t,()=>{const c=oreC(t);G.scale(1.3,1.3);PL([-18,6,-12,-12,4,-20,18,-8,16,12,-2,18],c);PL([-12,-12,4,-20,2,-4],shade(c,.5),0);PL([2,-4,18,-8,16,12],shade(c,-.25),0);E(-6,-6,3,3,'#fff',0)});
+/* minerais : une forme propre à chaque palier, de plus en plus précieuse */
+function SPARK(x,y,r,col='#ffffff'){PL([x,y-r,x+r*.28,y-r*.28,x+r,y,x+r*.28,y+r*.28,x,y+r,x-r*.28,y+r*.28,x-r,y,x-r*.28,y-r*.28],col,0)}
+function GEMCUBE(x,y,k,c){const a=14*k;PL([x,y-a,x+a,y-a*.5,x,y,x-a,y-a*.5],shade(c,.35),2.6);PL([x-a,y-a*.5,x,y,x,y+a,x-a,y+a*.5],c,2.6);PL([x+a,y-a*.5,x,y,x,y+a,x+a,y+a*.5],shade(c,-.3),2.6)}
+function SHARD(x,y,w,h,ang,c){G.save();G.translate(x,y);G.rotate(ang);FACET([-w,0,-w,-h,0,-h-w*1.4,w,-h,w,0],c,2.6);G.restore()}
+function drawOre(t){
+  const c=oreC(t),dk=shade(c,-.3);
+  const glow=(col,b,fn)=>{G.save();G.shadowColor=col;G.shadowBlur=b;fn();G.restore();fn()};
+  switch(t){
+  case 1: // cuivre : pépites rondes
+    E(-15,10,17,13,c,3);E(14,12,14,11,c,3);E(0,-8,17,15,c,3);E(-4,-11,4,3,dk,0);E(-18,12,3,2.5,dk,0);E(16,14,3,2,dk,0);break;
+  case 2: // fer : bloc de roche veiné
+    PL([-30,16,-26,-12,-8,-26,16,-22,30,-4,26,18],'#7a6e66',3.2);
+    PL([-22,4,-6,-10,10,-6,-2,6],c,2.4);PL([4,12,18,-2,24,6,14,16],c,2.4);PL([-18,-14,-8,-20,-4,-14],c,2);
+    E(-14,12,2.5,2.5,'#4a403a',0);E(20,-12,2,2,'#4a403a',0);break;
+  case 3: // argent : grappe de cristaux cubiques
+    PL([-30,20,-24,6,24,4,30,20],'#6e6a72',3);GEMCUBE(-12,8,1.05,c);GEMCUBE(14,6,.8,c);GEMCUBE(2,-12,1.1,c);SPARK(18,-22,7);break;
+  case 4: // mithril : éclats hexagonaux, légère lueur
+    PL([-32,22,-24,8,24,8,32,22],'#5e5884',3);
+    glow(c,10,()=>{SHARD(-14,14,6,28,-.35,c);SHARD(14,14,6,24,.4,c);SHARD(0,14,8,40,0,c)});SPARK(-20,-24,6);break;
+  case 5: // adamantite : gemme taillée sertie dans la roche
+    PL([-32,22,-30,-2,-14,-18,14,-18,30,-2,32,22],'#4e4a56',3.2);
+    glow(c,12,()=>{PL([-16,-10,16,-10,24,4,16,18,-16,18,-24,4],c,3);PL([-9,-4,9,-4,13,4,9,11,-9,11,-13,4],shade(c,.35),2);LN(-16,-10,-9,-4,dk,1.6);LN(16,-10,9,-4,dk,1.6);LN(-16,18,-9,11,dk,1.6);LN(16,18,9,11,dk,1.6)});SPARK(14,-22,7);break;
+  case 6: // orichalque : pépite d'or sur quartz, reflets
+    PL([-30,22,-26,4,-10,-4,6,0,28,6,30,22],'#efe9e0',3);LN(-14,8,-6,20,'#d8d2c8',2);
+    glow(c,16,()=>SH(()=>{G.moveTo(-18,8);G.bezierCurveTo(-24,-14,-4,-28,10,-20);G.bezierCurveTo(26,-14,24,6,14,12);G.bezierCurveTo(4,18,-12,18,-18,8);G.closePath()},c,3,-24,-26,48,44));
+    E(-2,-12,4,3,'#fff6c8',0);SPARK(20,-24,8);SPARK(-24,-14,5);break;
+  case 7: // obsidienne astrale : éclat noir constellé
+    glow(c,16,()=>PL([-20,22,-26,-2,-12,-30,2,-18,10,-38,24,-6,20,22],'#2a1d44',3.2));
+    PL([-12,-30,2,-18,10,-38,6,-10,-6,-8],shade(c,-.1),0);
+    for(const[x,y,r]of[[-12,4,4],[6,-14,5],[10,10,3.5],[-4,-20,3],[0,14,2.5]])SPARK(x,y,r,'#e8d8ff');break;
+  case 8: // cœur d'étoile : cristal étoilé rayonnant
+    G.save();for(let i=0;i<8;i++){G.rotate(Math.PI/4);PL([0,0,-6,-46,6,-46],'rgba(255,111,154,.28)',0)}G.restore();
+    const st=(r,col,lw)=>{const p=[];for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.48:r;p.push(Math.cos(a)*rr,Math.sin(a)*rr+2)}PL(p,col,lw)};
+    glow(c,20,()=>st(32,c,3.2));st(17,shade(c,.45),0);E(0,2,5,5,'#ffffff',0);SPARK(26,-22,7);SPARK(-26,20,5);break;
+  }
+}
+const oreIcon=t=>icon('o'+t,()=>{const k=t===4||t===7?1.08:1.25;G.translate(0,t===4||t===7?6:0);G.scale(k,k);drawOre(t)});
 const partIcon=(k,r)=>icon('p'+k+r,()=>{E(0,0,32,32,RCOL[r],4);E(0,0,26,26,'#6e665c',3);const c=PARTS[k].c;G.save();G.scale(1.1,1.1);
   ({garde:()=>{RR(-18,-5,36,10,4,c);RR(-4,-16,8,30,3,'#9a6230')},braise:()=>{G.save();G.shadowColor=c;G.shadowBlur=12;PL([0,-18,12,2,6,14,-6,14,-12,2],c);G.restore();E(0,6,5,6,'#ffe27a',0)},
     ecaille:()=>{for(let i=0;i<3;i++){G.beginPath();G.arc(-10+i*10,-2+(i%2)*8,8,0,Math.PI);fs(c,2.5)}},dentelee:()=>PL([-16,10,-12,-2,-6,6,0,-8,6,4,12,-10,16,10],c),
@@ -1086,7 +1123,7 @@ function drawForgeUI(g,W,H,t){
     for(let i=0;i<7;i++){const x=610+i*48,hh=60+40*MG.T*(.6+.4*Math.sin(t*9+i*1.7));PL([x-26,276,x,276-hh,x+26,276],heatHex(.35+MG.T*.6),0)}G.restore();
     PL([680,90,850,90,830,236,700,236],'#5a5f66',4);G.save();G.beginPath();G.moveTo(684,94);G.lineTo(846,94);G.lineTo(828,232);G.lineTo(702,232);G.closePath();G.clip();
     const lv=232-120*MG.melt;g.fillStyle=heatHex(.55+.4*MG.melt);g.fillRect(680,lv,170,240);E(765,lv,90,7,heatHex(.95),0);G.restore();
-    for(let i=0;i<5;i++){const k=clamp(1-MG.melt*1.35+i*.06,0,1);if(k>0){const x=712+i*26,y=Math.min(lv,226)-6;G.save();G.translate(x,y);G.scale(k,k);PL([-14,8,-10,-8,2,-14,14,-4,12,8],mix(oreC(MG.tier),'#ff7a2a',MG.melt*.6),2.5);G.restore()}}
+    for(let i=0;i<5;i++){const k=clamp(1-MG.melt*1.35+i*.06,0,1);if(k>0){const x=712+i*26,y=Math.min(lv,226)-6;G.save();G.translate(x,y);G.scale(k*.42,k*.42);drawOre(MG.tier);G.restore()}}
     TXT(`Fonte ${Math.round(MG.melt*100)} %`,765,62,24,'#fff');
     if(MG.T>MG.cz+MG.wz/2&&MG.t>0)TXT('Surchauffe !',765,258,20,'#ff7a5a')}
   if(ph===1){RR(20,20,330,48,12,'#eeedf8',4);TXT(MG.poured&&MG.hold?'Relâche à la ligne blanche':'Maintiens pour verser',185,45,20,'#2a2140','center','#eeedf8')}
@@ -1259,7 +1296,7 @@ function drawScene(g,W,H,t,dt){
   if(r.ph==='combat'&&r.enemy){const E2=ENEM[r.enemy.key];art=E2.art;sz=E2.sz||1;ent.angry=true;
     const ea=A.enAtk;if(ea>0&&art.t==='hum'){ent.swingFree=true;ent.arm=ea>.7?lerp(-.3,1.2,(1-ea)/.3):lerp(1.2,-1.5,(.7-ea)/.7);ent.wpn=ea>.7?lerp(.45,-.8,(1-ea)/.3):lerp(-.8,2.2,(.7-ea)/.7)}}
   else if(r.ph==='chest'&&r.chest){art={t:'chest',col:RCOL[r.chest.r],r:r.chest.r};ent.open=A.chestOpen}
-  else if(r.ph==='vein')art={t:'vein',col:oreC(r.vein)};
+  else if(r.ph==='vein')art={t:'vein',col:oreC(r.vein),tier:r.vein};
   else if(r.ph==='fork')art={t:'fork'};
   else if(r.scene&&!A.walking){art=r.scene;if(art.t==='chest')ent.open=1}
   const ex=W-230+A.ex+A.enter*500-(A.enAtk>0?Math.sin(A.enAtk*Math.PI)*70:0);
@@ -1616,7 +1653,7 @@ function drawChestScene(g,W,H,t){
   post(g,W,H,col,.55,.08);
   if(c.flash>0){g.fillStyle=`rgba(255,255,255,${clamp(c.flash,0,1)})`;g.fillRect(0,0,W,H)}
 }
-function mine(){const r=S.run,q=ri(2,4)+Math.floor(r.depth/6)+(SL('survie')>=3?1:0)+(r.veinB||0);r.veinB=0;skXp('survie',4*(1+r.zone));addToBag([{t:'ore',tier:r.vein,q}]);log('y',`Tu extrais ${q} × ${oreN(r.vein)}.`);floatTxt(960-230,200,`+${q} ${oreN(r.vein)}`,oreC(r.vein),1);r.scene={t:'vein',col:oreC(r.vein)};r.ph='choice';render()}
+function mine(){const r=S.run,q=ri(2,4)+Math.floor(r.depth/6)+(SL('survie')>=3?1:0)+(r.veinB||0);r.veinB=0;skXp('survie',4*(1+r.zone));addToBag([{t:'ore',tier:r.vein,q}]);log('y',`Tu extrais ${q} × ${oreN(r.vein)}.`);floatTxt(960-230,200,`+${q} ${oreN(r.vein)}`,oreC(r.vein),1);r.scene={t:'vein',col:oreC(r.vein),tier:r.vein};r.ph='choice';render()}
 function goHome(){
   const r=S.run,b=r.bag,L=[...b.list];if(b.gold)L.push({t:'gold',q:b.gold});
   skXp('survie',4*r.depth*(1+r.zone*.5));const notes=bankLoot(L);S.best[r.zone]=Math.max(S.best[r.zone]||0,r.depth);S.run=null;MAPSEL=Math.min(S.unlocked-1,5);
