@@ -3,12 +3,13 @@ const {chromium}=require('playwright');
 const errs=[];p.on('pageerror',e=>errs.push(e.message));p.on('console',m=>{if(m.type()==='error')errs.push(m.text())});
 await p.goto('file://'+require('path').join(__dirname,'..','index.html'));await p.waitForTimeout(800);
 await p.screenshot({path:require('path').join(__dirname,'captures','f0.png')});
+await p.evaluate(()=>{TAB='forge';render()});await p.waitForTimeout(300);
 await p.click('[data-a=fbp][data-v=epee]');await p.click('[data-a=fore][data-v="1"]');await p.click('[data-a=fpart]');
 await p.click('[data-a=forge]');await p.waitForTimeout(1600);
 for(let i=0;i<80;i++){if(await p.$('[data-a=equipNew]'))break;await p.keyboard.down('Space');await p.waitForTimeout(i%3==0?900:200);if(i==2)await p.screenshot({path:require('path').join(__dirname,'captures','f1.png')});if(i==20)await p.screenshot({path:require('path').join(__dirname,'captures','f2.png')});await p.keyboard.up('Space');await p.waitForTimeout(250)}
 await p.waitForTimeout(1200);await p.screenshot({path:require('path').join(__dirname,'captures','f4.png')});
 const eq=await p.$('[data-a=equipNew]');console.log('result?',!!eq);if(eq)await eq.click();
-await p.click('[data-a=tab][data-v=exp]');await p.waitForTimeout(500);await p.screenshot({path:require('path').join(__dirname,'captures','m1.png')});
+await p.evaluate(()=>{TAB='exp';render()});await p.waitForTimeout(500);await p.screenshot({path:require('path').join(__dirname,'captures','m1.png')});
 await p.click('[data-a=depart]');
 let shot=0;
 for(let k=0;k<60;k++){

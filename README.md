@@ -21,6 +21,7 @@ node tests/scene-coffre.js      # scène d'ouverture de coffre (peu commun et my
 node tests/planche-coffres.js   # les 6 coffres 2,5D fermés et ouverts
 node tests/competences.js       # onglet Compétences et aperçu de forge
 node tests/embranchements.js    # chaque voie d'un embranchement (grotte, pont, campement…)
+node tests/monde.js             # village (déplacement, bâtiments) et île (rencontre, combat, coffre)
 ```
 
 Chaque script affiche à la fin la liste des erreurs JavaScript rencontrées (`[]` ou `ERR []` si tout va bien).
@@ -41,6 +42,8 @@ Style cartoon à plat : fond lavande uni, couleurs unies, une seule bande d'ombr
 
 | Système | Résumé |
 |---|---|
+| Village (lobby) | Vue de dessus explorable (ZQSD/WASD/flèches ou toucher le sol, E pour interagir). Bâtiments : Forge, Marché, Atelier des étoiles (sac et étoiles), Maître d'armes (compétences), Tableau d'honneur (classement), Navire d'expédition. Les autres joueurs qui ont la page ouverte y apparaissent en direct avec leur équipement, leur nom et leur Puissance (capacité `room`). |
+| Îles | Chaque expédition est une île fermée générée (désert, forêt, cryptes, marais, volcan, Abysse) : ennemis qui rôdent et poursuivent, coffres, filons, autels, aventuriers tombés, grottes, campements, ruines, tanières, sanctuaires. Le danger (niveau des ennemis et du butin) monte en s'éloignant du navire ; le gardien est au bout de l'île ; on rentre en revenant au navire. Dans l'Abysse, un portail mène à la couche suivante. Mini-carte, ténèbres sans Lumière. |
 | Forge | Schéma (réutilisable, rang infini) + minerai (8 paliers) + moule et pièces optionnels. Cinq gestes notés, en gros plan : fonte (taper le soufflet, le minerai fond dans le creuset, attention à la surchauffe), coulée (remplir chaque cavité du moule — lame, garde, poignée… — jusqu'à sa ligne), martelage (frapper les cibles posées sur la pièce chaude avant qu'elle refroidisse ; la pièce s'aplatit coup après coup), trempe (couleur visée), affûtage ou polissage (la pièce glisse sur la meule, aiguiser chaque section au trait sans la brûler). Puis assemblage animé. La qualité 0–100 fixe les stats. |
 | Objets | Arme (épée, dague, hache, masse, lance, marteau), casque, cuirasse, bouclier. Rareté de Commun à Mythique, usure, réparation, démontage. |
 | Expéditions | 6 régions sur la carte du monde, la dernière sans fin. Sentier d'étapes (combat, coffre, filon, autel, aventurier tombé), gardien toutes les 5 profondeurs. |
@@ -64,7 +67,7 @@ Le script est découpé en sections commentées, dans cet ordre :
 5. **Dessin** : primitives à contour et ombrage (`SH`, `E`, `RR`, `PL`, `TUBE`, `TXT`), personnages (`drawHum`, `drawQuad`, `drawSpider`, `drawSlime`, `drawDragon`), coffres 2,5D (`drawChest3D`), icônes (`itemIcon`, `oreIcon`…), cartes de personnage (`drawCard`).
 6. **Vues** : `vForge`, `vEquip`, `vExp`, `vSkills`, `vMarket`, et `render()`.
 7. **Mini-jeu de forge** : `startForge`, `mgDown`/`mgUp`, `mgUpdate`, `pieceInfo` (cavités du moule), gros plans `drawPour`, `drawHammer`, `drawGrind`, `drawAssembly`, `drawForgeScene`.
-8. **Expédition** : décors (`paintBiome`), scène (`drawScene`), sentier (`drawTrail`), carte (`drawWorldMap`), logique (`step`, `resolveEvent`, embranchements `FORKS`/`genFork`/`chooseFork`, `cact`, `enemyAct`, `victory`, `goHome`, `defeat`).
+8. **Monde** : `HUBM`/`drawHub` (village), `genIsland`/`drawIsle` (îles), `moveActor`, `findPath`, présence `ROOM`. **Expédition** : décors (`paintBiome`), scène (`drawScene`), sentier (`drawTrail`), carte (`drawWorldMap`), logique (`step`, `resolveEvent`, embranchements `FORKS`/`genFork`/`chooseFork`, `cact`, `enemyAct`, `victory`, `goHome`, `defeat`).
 9. **Scène de coffre** : `startChestScene`, `chestUpdate`, `drawChestScene`.
 10. **Boucle d'animation** `loop()` et **actions** `ACT` (délégation des clics via `data-a`).
 
